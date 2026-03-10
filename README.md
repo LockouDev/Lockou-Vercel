@@ -20,40 +20,6 @@ Este projeto é uma landing page moderna e responsiva, criada para representar o
 - Vite
 - CSS puro
 
-## Como rodar localmente
-
-```bash
-npm install
-npm run dev
-```
-
-## Build de produção
-
-```bash
-npm run build
-npm run preview
-```
-
-## Estrutura do projeto
-
-```text
-.
-├── index.html
-├── package.json
-├── vite.config.js
-└── src
-    ├── App.jsx
-    ├── main.jsx
-    └── styles.css
-```
-
-## Deploy
-
-O deploy é feito na Vercel com preset **Vite**:
-
-- Build Command: `npm run build`
-- Output Directory: `dist`
-
 ## Autor
 
 Desenvolvido por **Lockou**.
