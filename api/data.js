@@ -28,6 +28,77 @@ function resolveAccurateFlag(value) {
   return isEnabled(value);
 }
 
+function parseDateBoundary(value, endOfDay = false) {
+  if (value === undefined || value === null) return null;
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const brDateMatch = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (brDateMatch) {
+    const day = Number(brDateMatch[1]);
+    const month = Number(brDateMatch[2]);
+    const year = Number(brDateMatch[3]);
+    return Date.UTC(
+      year,
+      month - 1,
+      day,
+      endOfDay ? 23 : 0,
+      endOfDay ? 59 : 0,
+      endOfDay ? 59 : 0,
+      endOfDay ? 999 : 0
+    );
+  }
+
+  const isoDateMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoDateMatch) {
+    const year = Number(isoDateMatch[1]);
+    const month = Number(isoDateMatch[2]);
+    const day = Number(isoDateMatch[3]);
+    return Date.UTC(
+      year,
+      month - 1,
+      day,
+      endOfDay ? 23 : 0,
+      endOfDay ? 59 : 0,
+      endOfDay ? 59 : 0,
+      endOfDay ? 999 : 0
+    );
+  }
+
+  const timestamp = Date.parse(raw);
+  if (Number.isNaN(timestamp)) {
+    return null;
+  }
+
+  return timestamp;
+}
+
+function isInDateRange(isoDate, fromTs, toTs) {
+  if (fromTs === null && toTs === null) {
+    return true;
+  }
+
+  if (!isoDate) {
+    return false;
+  }
+
+  const timestamp = Date.parse(String(isoDate));
+  if (Number.isNaN(timestamp)) {
+    return false;
+  }
+
+  if (fromTs !== null && timestamp < fromTs) {
+    return false;
+  }
+
+  if (toTs !== null && timestamp > toTs) {
+    return false;
+  }
+
+  return true;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -47,6 +118,28 @@ export default async function handler(req, res) {
     const includeMeta = isEnabled(req.query.meta);
     const accurate = resolveAccurateFlag(req.query.accurate);
     const coreOnly = true;
+    const hasFrom = req.query.from !== undefined;
+    const hasTo = req.query.to !== undefined;
+    const fromTs = parseDateBoundary(req.query.from, false);
+    const toTs = parseDateBoundary(req.query.to, true);
+
+    if (hasFrom && fromTs === null) {
+      return res.status(400).json({
+        error: "Invalid 'from' date. Use DD/MM/YYYY, YYYY-MM-DD, or ISO date.",
+      });
+    }
+
+    if (hasTo && toTs === null) {
+      return res.status(400).json({
+        error: "Invalid 'to' date. Use DD/MM/YYYY, YYYY-MM-DD, or ISO date.",
+      });
+    }
+
+    if (fromTs !== null && toTs !== null && fromTs > toTs) {
+      return res.status(400).json({
+        error: "Invalid date range: 'from' cannot be greater than 'to'.",
+      });
+    }
 
     if (storageProvider() === "kv") {
       const ids = await listSavedUserIds({ forceKeys: accurate });
@@ -76,6 +169,7 @@ export default async function handler(req, res) {
 
         for (const item of records) {
           if (!item.record?.data) continue;
+          if (!isInDateRange(item.record.updatedAt, fromTs, toTs)) continue;
           if (!hasImportantTemplateData(item.record.data)) continue;
 
           players[item.userId] = normalizePlayerData(
@@ -104,11 +198,34 @@ export default async function handler(req, res) {
         accurate,
         coreOnly,
         filterMode: "important-only-v1",
+        from: fromTs !== null ? new Date(fromTs).toISOString() : null,
+        to: toTs !== null ? new Date(toTs).toISOString() : null,
         players,
       });
     }
 
     const doc = await readAllPlayersFromFile();
+    if (!isInDateRange(doc.updatedAt, fromTs, toTs)) {
+      if (!includeMeta) {
+        return res.status(200).json({});
+      }
+
+      return res.status(200).json({
+        totalPlayers: 0,
+        returnedPlayers: 0,
+        offset,
+        limit,
+        hasMore: false,
+        updatedAt: doc.updatedAt || null,
+        accurate: true,
+        coreOnly,
+        filterMode: "important-only-v1",
+        from: fromTs !== null ? new Date(fromTs).toISOString() : null,
+        to: toTs !== null ? new Date(toTs).toISOString() : null,
+        players: {},
+      });
+    }
+
     const ids = Object.keys(doc.players).sort((a, b) =>
       String(a).localeCompare(String(b), undefined, {
         numeric: true,
@@ -138,6 +255,8 @@ export default async function handler(req, res) {
       accurate: true,
       coreOnly,
       filterMode: "important-only-v1",
+      from: fromTs !== null ? new Date(fromTs).toISOString() : null,
+      to: toTs !== null ? new Date(toTs).toISOString() : null,
       players,
     });
   } catch (error) {

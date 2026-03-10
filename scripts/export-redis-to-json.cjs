@@ -41,13 +41,24 @@ async function writeOrDrain(stream, text) {
   await once(stream, "drain");
 }
 
-async function fetchPage({ baseUrl, limit, offset, accurate, coreOnly, apiKey }) {
+async function fetchPage({
+  baseUrl,
+  limit,
+  offset,
+  accurate,
+  coreOnly,
+  apiKey,
+  from,
+  to,
+}) {
   const url = new URL("/api/data", baseUrl);
   url.searchParams.set("meta", "1");
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("offset", String(offset));
   url.searchParams.set("accurate", accurate ? "1" : "0");
   url.searchParams.set("coreOnly", coreOnly ? "1" : "0");
+  if (from) url.searchParams.set("from", from);
+  if (to) url.searchParams.set("to", to);
 
   const headers = {};
   if (apiKey) {
@@ -86,6 +97,8 @@ async function run() {
     true
   );
   const apiKey = getArg("api-key", process.env.ROBLOX_API_KEY || "");
+  const from = getArg("from", process.env.EXPORT_FROM || "");
+  const to = getArg("to", process.env.EXPORT_TO || "");
 
   const absoluteOutputPath = path.resolve(outputPath);
   fs.mkdirSync(path.dirname(absoluteOutputPath), { recursive: true });
@@ -97,6 +110,8 @@ async function run() {
     accurate,
     coreOnly,
     apiKey,
+    from,
+    to,
   });
 
   const writeStream = fs.createWriteStream(absoluteOutputPath, {
@@ -118,6 +133,8 @@ async function run() {
       accurate,
       coreOnly,
       totalPlayersExpected: Number(firstPage.totalPlayers) || 0,
+      from: firstPage.from || from || null,
+      to: firstPage.to || to || null,
       players: {},
     }).replace(/\{\}$/, "")
   );
@@ -158,6 +175,8 @@ async function run() {
       accurate,
       coreOnly,
       apiKey,
+      from,
+      to,
     });
 
     await writePlayers(page.players);

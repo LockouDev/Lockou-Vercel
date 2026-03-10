@@ -80,6 +80,86 @@ function toBoolean(value) {
   return ["1", "true", "yes", "on"].includes(normalized);
 }
 
+function parseDateBoundary(value, endOfDay = false) {
+  if (value === undefined || value === null) return null;
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const brDateMatch = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (brDateMatch) {
+    const day = Number(brDateMatch[1]);
+    const month = Number(brDateMatch[2]);
+    const year = Number(brDateMatch[3]);
+    return Date.UTC(
+      year,
+      month - 1,
+      day,
+      endOfDay ? 23 : 0,
+      endOfDay ? 59 : 0,
+      endOfDay ? 59 : 0,
+      endOfDay ? 999 : 0
+    );
+  }
+
+  const isoDateMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoDateMatch) {
+    const year = Number(isoDateMatch[1]);
+    const month = Number(isoDateMatch[2]);
+    const day = Number(isoDateMatch[3]);
+    return Date.UTC(
+      year,
+      month - 1,
+      day,
+      endOfDay ? 23 : 0,
+      endOfDay ? 59 : 0,
+      endOfDay ? 59 : 0,
+      endOfDay ? 999 : 0
+    );
+  }
+
+  const timestamp = Date.parse(raw);
+  if (Number.isNaN(timestamp)) {
+    return null;
+  }
+
+  return timestamp;
+}
+
+function parseTimestampValue(value) {
+  if (value === undefined || value === null) return null;
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    if (value > 1e12) return Math.trunc(value);
+    if (value > 1e9) return Math.trunc(value * 1000);
+    return Math.trunc(value);
+  }
+
+  const text = String(value).trim();
+  if (!text) return null;
+
+  const numeric = Number(text);
+  if (Number.isFinite(numeric)) {
+    if (numeric > 1e12) return Math.trunc(numeric);
+    if (numeric > 1e9) return Math.trunc(numeric * 1000);
+    return Math.trunc(numeric);
+  }
+
+  const timestamp = Date.parse(text);
+  if (Number.isNaN(timestamp)) {
+    return null;
+  }
+
+  return timestamp;
+}
+
+function isTimestampInRange(timestamp, fromTs, toTs) {
+  if (timestamp === null) return false;
+  if (fromTs !== null && timestamp < fromTs) return false;
+  if (toTs !== null && timestamp > toTs) return false;
+  return true;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -124,6 +204,30 @@ export default async function handler(req, res) {
     body.requireImportantData === undefined
       ? true
       : toBoolean(body.requireImportantData);
+  const dateField = String(body.dateField || "LastSessionTime").trim() || "LastSessionTime";
+  const hasFrom = body.from !== undefined && String(body.from ?? "").trim() !== "";
+  const hasTo = body.to !== undefined && String(body.to ?? "").trim() !== "";
+  const dateFilterApplied = hasFrom || hasTo;
+  const fromTs = parseDateBoundary(body.from, false);
+  const toTs = parseDateBoundary(body.to, true);
+
+  if (hasFrom && fromTs === null) {
+    return res.status(400).json({
+      error: "Invalid 'from' date. Use DD/MM/YYYY, YYYY-MM-DD, or ISO date.",
+    });
+  }
+
+  if (hasTo && toTs === null) {
+    return res.status(400).json({
+      error: "Invalid 'to' date. Use DD/MM/YYYY, YYYY-MM-DD, or ISO date.",
+    });
+  }
+
+  if (fromTs !== null && toTs !== null && fromTs > toTs) {
+    return res.status(400).json({
+      error: "Invalid date range: 'from' cannot be greater than 'to'.",
+    });
+  }
 
   if (entries.length === 0) {
     return res.status(400).json({
@@ -133,12 +237,27 @@ export default async function handler(req, res) {
   }
 
   try {
-    let entriesAfterImportance = entries;
+    let entriesAfterDate = entries;
+    const ignoredOutOfRangeUsers = [];
+
+    if (dateFilterApplied) {
+      entriesAfterDate = [];
+      for (const entry of entries) {
+        const timestamp = parseTimestampValue(entry.data?.[dateField]);
+        if (!isTimestampInRange(timestamp, fromTs, toTs)) {
+          ignoredOutOfRangeUsers.push(entry.userId);
+          continue;
+        }
+        entriesAfterDate.push(entry);
+      }
+    }
+
+    let entriesAfterImportance = entriesAfterDate;
     const ignoredNoImportantUsers = [];
 
     if (requireImportantData) {
       entriesAfterImportance = [];
-      for (const entry of entries) {
+      for (const entry of entriesAfterDate) {
         if (!hasImportantTemplateData(entry.data)) {
           ignoredNoImportantUsers.push(entry.userId);
           continue;
@@ -188,6 +307,7 @@ export default async function handler(req, res) {
     }
 
     const skippedUsers = [
+      ...ignoredOutOfRangeUsers,
       ...ignoredNoImportantUsers,
       ...ignoredEmptyUsers,
       ...existingSkippedUsers,
@@ -202,6 +322,8 @@ export default async function handler(req, res) {
         totalFailed: 0,
         skippedUsers,
         totalSkipped: skippedUsers.length,
+        ignoredOutOfRangeUsers,
+        totalIgnoredOutOfRange: ignoredOutOfRangeUsers.length,
         ignoredNoImportantUsers,
         totalIgnoredNoImportant: ignoredNoImportantUsers.length,
         ignoredEmptyUsers,
@@ -211,12 +333,16 @@ export default async function handler(req, res) {
         skipExisting,
         skipEmptyTemplates,
         requireImportantData,
+        dateFilterApplied,
+        dateField: dateFilterApplied ? dateField : null,
+        from: fromTs !== null ? new Date(fromTs).toISOString() : null,
+        to: toTs !== null ? new Date(toTs).toISOString() : null,
         provider: storageProvider(),
         kvFailed: 0,
         fileSync: {
           success: false,
           skipped: true,
-          reason: "All users already existed",
+          reason: "No users eligible to save",
           filePath: getStepMusicDataFilePath(),
           totalPlayers: null,
           updatedAt: null,
@@ -283,6 +409,8 @@ export default async function handler(req, res) {
         totalFailed: kvFailed,
         skippedUsers,
         totalSkipped: skippedUsers.length,
+        ignoredOutOfRangeUsers,
+        totalIgnoredOutOfRange: ignoredOutOfRangeUsers.length,
         ignoredNoImportantUsers,
         totalIgnoredNoImportant: ignoredNoImportantUsers.length,
         ignoredEmptyUsers,
@@ -292,6 +420,10 @@ export default async function handler(req, res) {
         skipExisting,
         skipEmptyTemplates,
         requireImportantData,
+        dateFilterApplied,
+        dateField: dateFilterApplied ? dateField : null,
+        from: fromTs !== null ? new Date(fromTs).toISOString() : null,
+        to: toTs !== null ? new Date(toTs).toISOString() : null,
         provider: storageProvider(),
         kvFailed,
         fileSync,
@@ -306,6 +438,8 @@ export default async function handler(req, res) {
       totalFailed: kvFailed,
       skippedUsers,
       totalSkipped: skippedUsers.length,
+      ignoredOutOfRangeUsers,
+      totalIgnoredOutOfRange: ignoredOutOfRangeUsers.length,
       ignoredNoImportantUsers,
       totalIgnoredNoImportant: ignoredNoImportantUsers.length,
       ignoredEmptyUsers,
@@ -315,6 +449,10 @@ export default async function handler(req, res) {
       skipExisting,
       skipEmptyTemplates,
       requireImportantData,
+      dateFilterApplied,
+      dateField: dateFilterApplied ? dateField : null,
+      from: fromTs !== null ? new Date(fromTs).toISOString() : null,
+      to: toTs !== null ? new Date(toTs).toISOString() : null,
       provider: storageProvider(),
       kvFailed,
       fileSync,
