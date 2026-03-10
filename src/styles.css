@@ -404,6 +404,17 @@ a {
   font-size: 1.05rem;
 }
 
+.contact-icon-image {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.contact-icon--roblox {
+  background: #f2f6ff;
+  border-color: rgba(130, 179, 255, 0.66);
+}
+
 .contact-content {
   display: grid;
   gap: 2px;

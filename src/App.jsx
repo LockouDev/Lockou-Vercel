@@ -101,7 +101,15 @@ function App() {
               </div>
             </li>
             <li>
-              <i className="bi bi-controller contact-icon" aria-hidden="true"></i>
+              <span className="contact-icon contact-icon--roblox" aria-hidden="true">
+                <img
+                  width="50"
+                  height="50"
+                  src="https://img.icons8.com/ios-filled/50/roblox.png"
+                  alt="roblox"
+                  className="contact-icon-image"
+                />
+              </span>
               <div className="contact-content">
                 <span>Roblox</span>
                 <a
