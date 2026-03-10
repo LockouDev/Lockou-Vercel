@@ -21,6 +21,13 @@ function isEnabled(value) {
   return ["1", "true", "yes", "on"].includes(normalized);
 }
 
+function resolveAccurateFlag(value) {
+  if (value === undefined || value === null || value === "") {
+    return true;
+  }
+  return isEnabled(value);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -33,10 +40,11 @@ export default async function handler(req, res) {
       Number.parseInt(String(req.query.offset ?? "0"), 10) || 0
     );
     const includeMeta = isEnabled(req.query.meta);
+    const accurate = resolveAccurateFlag(req.query.accurate);
 
     if (storageProvider() === "kv") {
-      const totalPlayers = await countSavedUsers();
-      const ids = await listSavedUserIds();
+      const ids = await listSavedUserIds({ forceKeys: accurate });
+      const totalPlayers = accurate ? ids.length : await countSavedUsers();
       const sortedIds = ids.sort((a, b) =>
         String(a).localeCompare(String(b), undefined, {
           numeric: true,
@@ -82,6 +90,7 @@ export default async function handler(req, res) {
         limit,
         hasMore: offset + limit < totalPlayers,
         updatedAt: latestUpdatedAt,
+        accurate,
         players,
       });
     }
@@ -111,6 +120,7 @@ export default async function handler(req, res) {
       limit,
       hasMore: offset + limit < ids.length,
       updatedAt: doc.updatedAt || null,
+      accurate: true,
       players,
     });
   } catch (error) {

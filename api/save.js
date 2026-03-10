@@ -1,4 +1,5 @@
 import { hasUserData, saveUserData, storageProvider } from "./_storage.js";
+import { isPlayerTemplateEmpty } from "./_template.js";
 import {
   getStepMusicDataFilePath,
   upsertPlayersInFile,
@@ -115,6 +116,10 @@ export default async function handler(req, res) {
     (entry) => entry.userId && isRecord(entry.data)
   );
   const skipExisting = toBoolean(body.skipExisting);
+  const skipEmptyTemplates =
+    body.skipEmptyTemplates === undefined
+      ? true
+      : toBoolean(body.skipEmptyTemplates);
 
   if (entries.length === 0) {
     return res.status(400).json({
@@ -124,12 +129,26 @@ export default async function handler(req, res) {
   }
 
   try {
-    let entriesToSave = entries;
-    let skippedUsers = [];
+    let entriesToCheck = entries;
+    const ignoredEmptyUsers = [];
+    let existingSkippedUsers = [];
+
+    if (skipEmptyTemplates) {
+      entriesToCheck = [];
+      for (const entry of entries) {
+        if (isPlayerTemplateEmpty(entry.data)) {
+          ignoredEmptyUsers.push(entry.userId);
+          continue;
+        }
+        entriesToCheck.push(entry);
+      }
+    }
+
+    let entriesToSave = entriesToCheck;
 
     if (skipExisting) {
       const checks = await Promise.all(
-        entries.map(async (entry) => {
+        entriesToCheck.map(async (entry) => {
           try {
             const exists = await hasUserData(entry.userId);
             return { userId: entry.userId, exists };
@@ -142,19 +161,31 @@ export default async function handler(req, res) {
       const existingSet = new Set(
         checks.filter((item) => item.exists).map((item) => item.userId)
       );
-      skippedUsers = entries
+      existingSkippedUsers = entriesToCheck
         .filter((entry) => existingSet.has(entry.userId))
         .map((entry) => entry.userId);
-      entriesToSave = entries.filter((entry) => !existingSet.has(entry.userId));
+      entriesToSave = entriesToCheck.filter(
+        (entry) => !existingSet.has(entry.userId)
+      );
     }
+
+    const skippedUsers = [...ignoredEmptyUsers, ...existingSkippedUsers];
 
     if (entriesToSave.length === 0) {
       return res.status(200).json({
         success: true,
         savedUsers: [],
         totalSaved: 0,
+        failedUsers: [],
+        totalFailed: 0,
         skippedUsers,
         totalSkipped: skippedUsers.length,
+        ignoredEmptyUsers,
+        totalIgnoredEmpty: ignoredEmptyUsers.length,
+        totalReceived: entries.length,
+        totalChecked: entriesToCheck.length,
+        skipExisting,
+        skipEmptyTemplates,
         provider: storageProvider(),
         kvFailed: 0,
         fileSync: {
@@ -171,9 +202,23 @@ export default async function handler(req, res) {
     const kvResults = await Promise.allSettled(
       entriesToSave.map((entry) => saveUserData(entry.userId, entry.data))
     );
-    const kvFailed = kvResults.filter(
-      (result) => result.status === "rejected"
-    ).length;
+    const savedUsers = [];
+    const failedUsers = [];
+
+    for (let index = 0; index < kvResults.length; index += 1) {
+      const result = kvResults[index];
+      const userId = entriesToSave[index]?.userId;
+      if (!userId) continue;
+
+      if (result.status === "fulfilled") {
+        savedUsers.push(userId);
+      } else {
+        failedUsers.push(userId);
+      }
+    }
+
+    const kvSucceeded = savedUsers.length;
+    const kvFailed = failedUsers.length;
 
     const isVercelRuntime = process.env.VERCEL === "1";
     let fileSync = {
@@ -204,14 +249,21 @@ export default async function handler(req, res) {
       };
     }
 
-    const kvSucceeded = entriesToSave.length - kvFailed;
     if (kvSucceeded === 0 && !fileSync.success) {
       return res.status(500).json({
         error: "Failed to persist data in KV and StepMusic/Data.js",
-        savedUsers: [],
+        savedUsers,
         totalSaved: 0,
+        failedUsers,
+        totalFailed: kvFailed,
         skippedUsers,
         totalSkipped: skippedUsers.length,
+        ignoredEmptyUsers,
+        totalIgnoredEmpty: ignoredEmptyUsers.length,
+        totalReceived: entries.length,
+        totalChecked: entriesToCheck.length,
+        skipExisting,
+        skipEmptyTemplates,
         provider: storageProvider(),
         kvFailed,
         fileSync,
@@ -220,12 +272,18 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: kvSucceeded > 0 || fileSync.success,
-      savedUsers: entriesToSave.map((entry) => entry.userId),
-      totalSaved: entriesToSave.length,
+      savedUsers,
+      totalSaved: kvSucceeded,
+      failedUsers,
+      totalFailed: kvFailed,
       skippedUsers,
       totalSkipped: skippedUsers.length,
+      ignoredEmptyUsers,
+      totalIgnoredEmpty: ignoredEmptyUsers.length,
       totalReceived: entries.length,
+      totalChecked: entriesToCheck.length,
       skipExisting,
+      skipEmptyTemplates,
       provider: storageProvider(),
       kvFailed,
       fileSync,
