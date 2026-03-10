@@ -1,1 +1,6 @@
 *.env
+
+Backup_DataVersion_Temp.luau
+selene.toml
+
+*.gitignore
