@@ -1,0 +1,95 @@
+const DEFAULT_PLAYER_TEMPLATE = {
+  Donations: 0,
+  Gamepasses: {},
+  FavoriteDances: {},
+  Tools: {},
+  Hoverboards: {},
+  Pets: {},
+  Auras: {},
+  Hats: {},
+  bannerImg: 121797309734636,
+  bannerTitle: "StepUp",
+  AdminItems: {
+    Tools: {},
+    Auras: {},
+    Hoverboards: {},
+    Hats: {},
+  },
+  pId: 0,
+  gamepassForSale: {},
+  newitemplatedsf2053: 0,
+  favoritedSongs: {},
+  totalFavoritedSongs: 0,
+  lavasword23: 0,
+  purchasedSongs: {},
+};
+
+function isPlainObject(value) {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function deepClone(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => deepClone(item));
+  }
+
+  if (isPlainObject(value)) {
+    const output = {};
+    for (const [key, item] of Object.entries(value)) {
+      output[key] = deepClone(item);
+    }
+    return output;
+  }
+
+  return value;
+}
+
+function mergeWithTemplate(templateValue, dataValue) {
+  if (Array.isArray(templateValue)) {
+    if (Array.isArray(dataValue)) {
+      return deepClone(dataValue);
+    }
+    return deepClone(templateValue);
+  }
+
+  if (isPlainObject(templateValue)) {
+    const output = deepClone(templateValue);
+    if (!isPlainObject(dataValue)) {
+      return output;
+    }
+
+    for (const [key, value] of Object.entries(dataValue)) {
+      if (key in output) {
+        output[key] = mergeWithTemplate(output[key], value);
+      } else {
+        output[key] = deepClone(value);
+      }
+    }
+
+    return output;
+  }
+
+  if (dataValue === undefined || dataValue === null) {
+    return deepClone(templateValue);
+  }
+
+  return deepClone(dataValue);
+}
+
+export function normalizePlayerData(userId, rawData) {
+  const normalized = mergeWithTemplate(DEFAULT_PLAYER_TEMPLATE, rawData);
+  if (
+    normalized.pId === null ||
+    normalized.pId === undefined ||
+    normalized.pId === "" ||
+    normalized.pId === 0
+  ) {
+    const asNumber = Number(userId);
+    normalized.pId = Number.isFinite(asNumber) ? asNumber : String(userId);
+  }
+  return normalized;
+}
+
+export function getDefaultPlayerTemplate() {
+  return deepClone(DEFAULT_PLAYER_TEMPLATE);
+}
