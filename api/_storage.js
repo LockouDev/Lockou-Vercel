@@ -3,9 +3,18 @@ globalThis.__robloxMemoryStore = memoryStore;
 
 const kvUrl = process.env.KV_REST_API_URL;
 const kvToken = process.env.KV_REST_API_TOKEN;
+const isVercelRuntime = process.env.VERCEL === "1";
 
 function hasKvConfig() {
   return Boolean(kvUrl && kvToken);
+}
+
+function ensurePersistentStorage() {
+  if (!hasKvConfig() && isVercelRuntime) {
+    throw new Error(
+      "KV not configured in Vercel. Set KV_REST_API_URL and KV_REST_API_TOKEN."
+    );
+  }
 }
 
 function getKey(userId) {
@@ -23,6 +32,8 @@ function getBaseUrl() {
 }
 
 export async function saveUserData(userId, data) {
+  ensurePersistentStorage();
+
   const key = getKey(userId);
   const payload = JSON.stringify({
     data,
@@ -54,6 +65,8 @@ export async function saveUserData(userId, data) {
 }
 
 export async function loadUserData(userId) {
+  ensurePersistentStorage();
+
   const key = getKey(userId);
 
   if (!hasKvConfig()) {
