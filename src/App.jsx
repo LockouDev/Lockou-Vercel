@@ -83,28 +83,42 @@ function App() {
 
           <ul className="contact-list">
             <li>
-              <span>Email:</span>
-              <a href="mailto:kaiojeffoficial@gmail.com">kaiojeffoficial@gmail.com</a>
+              <i className="bi bi-envelope-fill contact-icon" aria-hidden="true"></i>
+              <div className="contact-content">
+                <span>Email</span>
+                <a href="mailto:kaiojeffoficial@gmail.com">
+                  kaiojeffoficial@gmail.com
+                </a>
+              </div>
             </li>
             <li>
-              <span>X [Twitter]:</span>
-              <a href="https://x.com/LockouRBLX" target="_blank" rel="noreferrer">
-                https://x.com/LockouRBLX
-              </a>
+              <i className="bi bi-twitter-x contact-icon" aria-hidden="true"></i>
+              <div className="contact-content">
+                <span>X [Twitter]</span>
+                <a href="https://x.com/LockouRBLX" target="_blank" rel="noreferrer">
+                  https://x.com/LockouRBLX
+                </a>
+              </div>
             </li>
             <li>
-              <span>Roblox:</span>
-              <a
-                href="https://www.roblox.com/users/89879612/profile"
-                target="_blank"
-                rel="noreferrer"
-              >
-                https://www.roblox.com/users/89879612/profile
-              </a>
+              <i className="bi bi-controller contact-icon" aria-hidden="true"></i>
+              <div className="contact-content">
+                <span>Roblox</span>
+                <a
+                  href="https://www.roblox.com/users/89879612/profile"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  https://www.roblox.com/users/89879612/profile
+                </a>
+              </div>
             </li>
             <li>
-              <span>Discord:</span>
-              <strong>lockou</strong>
+              <i className="bi bi-discord contact-icon" aria-hidden="true"></i>
+              <div className="contact-content">
+                <span>Discord</span>
+                <strong>lockou</strong>
+              </div>
             </li>
           </ul>
         </section>
