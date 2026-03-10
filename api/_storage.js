@@ -55,15 +55,33 @@ async function kvRequest(path, { method = "GET", body } = {}) {
   return response;
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function addUserIdToKvIndex(userId) {
-  try {
-    await kvRequest(
-      `/sadd/${encodeURIComponent(USER_INDEX_KEY)}/${encodeURIComponent(userId)}`,
-      { method: "POST" }
-    );
-  } catch {
-    // Index is best-effort; data save should still succeed.
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await kvRequest(
+        `/sadd/${encodeURIComponent(USER_INDEX_KEY)}/${encodeURIComponent(
+          userId
+        )}`,
+        { method: "POST" }
+      );
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) {
+        await sleep(150 * attempt);
+      }
+    }
   }
+
+  throw new Error(
+    `Failed to index userId ${userId} in KV set: ${lastError?.message || "unknown error"}`
+  );
 }
 
 export async function saveUserData(userId, data) {
@@ -158,8 +176,9 @@ export async function hasUserData(userId) {
   return Boolean(found);
 }
 
-export async function listSavedUserIds() {
+export async function listSavedUserIds(options = {}) {
   ensurePersistentStorage();
+  const forceKeys = options?.forceKeys === true;
 
   if (!hasKvConfig()) {
     const ids = [];
@@ -171,17 +190,19 @@ export async function listSavedUserIds() {
     return ids;
   }
 
-  try {
-    const response = await kvRequest(
-      `/smembers/${encodeURIComponent(USER_INDEX_KEY)}`,
-      { method: "GET" }
-    );
-    const body = await response.json();
-    if (Array.isArray(body?.result) && body.result.length > 0) {
-      return body.result.map((value) => String(value));
+  if (!forceKeys) {
+    try {
+      const response = await kvRequest(
+        `/smembers/${encodeURIComponent(USER_INDEX_KEY)}`,
+        { method: "GET" }
+      );
+      const body = await response.json();
+      if (Array.isArray(body?.result) && body.result.length > 0) {
+        return body.result.map((value) => String(value));
+      }
+    } catch {
+      // Fall back to key pattern listing.
     }
-  } catch {
-    // Fall back to key pattern listing.
   }
 
   const fallback = await kvRequest(

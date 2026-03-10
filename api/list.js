@@ -29,8 +29,11 @@ export default async function handler(req, res) {
   try {
     const provider = storageProvider();
     if (provider === "kv") {
+      const accurate = isEnabled(req.query.accurate);
       const full = isEnabled(req.query.full);
-      const totalPlayers = await countSavedUsers();
+      const totalPlayers = accurate
+        ? (await listSavedUserIds({ forceKeys: true })).length
+        : await countSavedUsers();
 
       if (!full) {
         return res.status(200).json({
@@ -39,6 +42,7 @@ export default async function handler(req, res) {
           totalPlayers,
           source: "kv",
           mode: "summary",
+          accurate,
           players: {},
         });
       }
@@ -48,7 +52,7 @@ export default async function handler(req, res) {
         0,
         Number.parseInt(String(req.query.offset ?? "0"), 10) || 0
       );
-      const ids = await listSavedUserIds();
+      const ids = await listSavedUserIds({ forceKeys: accurate });
       const sortedIds = ids.sort((a, b) =>
         String(a).localeCompare(String(b), undefined, {
           numeric: true,
@@ -93,6 +97,7 @@ export default async function handler(req, res) {
         hasMore: offset + limit < totalPlayers,
         source: "kv",
         mode: "full",
+        accurate,
         players,
       });
     }
