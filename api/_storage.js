@@ -119,6 +119,40 @@ export async function saveUserData(userId, data) {
   return { provider: "kv" };
 }
 
+export async function deleteUserData(userId) {
+  ensurePersistentStorage();
+
+  const key = getKey(userId);
+  const normalizedUserId = String(userId);
+
+  if (!hasKvConfig()) {
+    const existed = memoryStore.delete(key);
+    return { provider: "memory", existed };
+  }
+
+  try {
+    await kvRequest(
+      `/srem/${encodeURIComponent(USER_INDEX_KEY)}/${encodeURIComponent(
+        normalizedUserId
+      )}`,
+      { method: "POST" }
+    );
+  } catch {
+    // Continue even if the index cleanup fails.
+  }
+
+  const response = await kvRequest(`/del/${encodeURIComponent(key)}`, {
+    method: "POST",
+  });
+  const body = await response.json();
+  const deletedCount = Number(body?.result) || 0;
+
+  return {
+    provider: "kv",
+    existed: deletedCount > 0,
+  };
+}
+
 export async function loadUserData(userId) {
   ensurePersistentStorage();
 
