@@ -1,4 +1,4 @@
-import { saveUserData, storageProvider } from "./_storage.js";
+import { hasUserData, saveUserData, storageProvider } from "./_storage.js";
 import {
   getStepMusicDataFilePath,
   upsertPlayersInFile,
@@ -70,6 +70,15 @@ function buildEntriesFromPayload(body) {
   return [{ userId, data }];
 }
 
+function toBoolean(value) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  return ["1", "true", "yes", "on"].includes(normalized);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -105,6 +114,7 @@ export default async function handler(req, res) {
   const entries = buildEntriesFromPayload(body).filter(
     (entry) => entry.userId && isRecord(entry.data)
   );
+  const skipExisting = toBoolean(body.skipExisting);
 
   if (entries.length === 0) {
     return res.status(400).json({
@@ -114,38 +124,94 @@ export default async function handler(req, res) {
   }
 
   try {
+    let entriesToSave = entries;
+    let skippedUsers = [];
+
+    if (skipExisting) {
+      const checks = await Promise.all(
+        entries.map(async (entry) => {
+          try {
+            const exists = await hasUserData(entry.userId);
+            return { userId: entry.userId, exists };
+          } catch {
+            return { userId: entry.userId, exists: false };
+          }
+        })
+      );
+
+      const existingSet = new Set(
+        checks.filter((item) => item.exists).map((item) => item.userId)
+      );
+      skippedUsers = entries
+        .filter((entry) => existingSet.has(entry.userId))
+        .map((entry) => entry.userId);
+      entriesToSave = entries.filter((entry) => !existingSet.has(entry.userId));
+    }
+
+    if (entriesToSave.length === 0) {
+      return res.status(200).json({
+        success: true,
+        savedUsers: [],
+        totalSaved: 0,
+        skippedUsers,
+        totalSkipped: skippedUsers.length,
+        provider: storageProvider(),
+        kvFailed: 0,
+        fileSync: {
+          success: false,
+          skipped: true,
+          reason: "All users already existed",
+          filePath: getStepMusicDataFilePath(),
+          totalPlayers: null,
+          updatedAt: null,
+        },
+      });
+    }
+
     const kvResults = await Promise.allSettled(
-      entries.map((entry) => saveUserData(entry.userId, entry.data))
+      entriesToSave.map((entry) => saveUserData(entry.userId, entry.data))
     );
     const kvFailed = kvResults.filter(
       (result) => result.status === "rejected"
     ).length;
 
+    const isVercelRuntime = process.env.VERCEL === "1";
     let fileSync = {
       success: false,
       filePath: getStepMusicDataFilePath(),
       totalPlayers: null,
       updatedAt: null,
+      skipped: false,
     };
 
-    try {
-      const fileResult = await upsertPlayersInFile(entries);
+    if (!isVercelRuntime) {
+      try {
+        const fileResult = await upsertPlayersInFile(entriesToSave);
+        fileSync = {
+          success: true,
+          filePath: fileResult.filePath,
+          totalPlayers: fileResult.totalPlayers,
+          updatedAt: fileResult.updatedAt,
+          skipped: false,
+        };
+      } catch (fileError) {
+        console.error("Erro ao sincronizar StepMusic/Data.js:", fileError);
+      }
+    } else {
       fileSync = {
-        success: true,
-        filePath: fileResult.filePath,
-        totalPlayers: fileResult.totalPlayers,
-        updatedAt: fileResult.updatedAt,
+        ...fileSync,
+        skipped: true,
       };
-    } catch (fileError) {
-      console.error("Erro ao sincronizar StepMusic/Data.js:", fileError);
     }
 
-    const kvSucceeded = entries.length - kvFailed;
+    const kvSucceeded = entriesToSave.length - kvFailed;
     if (kvSucceeded === 0 && !fileSync.success) {
       return res.status(500).json({
         error: "Failed to persist data in KV and StepMusic/Data.js",
         savedUsers: [],
         totalSaved: 0,
+        skippedUsers,
+        totalSkipped: skippedUsers.length,
         provider: storageProvider(),
         kvFailed,
         fileSync,
@@ -154,8 +220,12 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: kvSucceeded > 0 || fileSync.success,
-      savedUsers: entries.map((entry) => entry.userId),
-      totalSaved: entries.length,
+      savedUsers: entriesToSave.map((entry) => entry.userId),
+      totalSaved: entriesToSave.length,
+      skippedUsers,
+      totalSkipped: skippedUsers.length,
+      totalReceived: entries.length,
+      skipExisting,
       provider: storageProvider(),
       kvFailed,
       fileSync,

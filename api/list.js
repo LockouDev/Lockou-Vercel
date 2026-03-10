@@ -1,4 +1,5 @@
 import {
+  countSavedUsers,
   listSavedUserIds,
   loadUserData,
   storageProvider,
@@ -13,6 +14,13 @@ function toPositiveInt(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function isEnabled(value) {
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  return ["1", "true", "yes", "on"].includes(normalized);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -21,9 +29,33 @@ export default async function handler(req, res) {
   try {
     const provider = storageProvider();
     if (provider === "kv") {
-      const limit = Math.min(toPositiveInt(req.query.limit, 1000), 5000);
+      const full = isEnabled(req.query.full);
+      const totalPlayers = await countSavedUsers();
+
+      if (!full) {
+        return res.status(200).json({
+          datastoreName: DATASTORE_NAME,
+          updatedAt: null,
+          totalPlayers,
+          source: "kv",
+          mode: "summary",
+          players: {},
+        });
+      }
+
+      const limit = Math.min(toPositiveInt(req.query.limit, 250), 2000);
+      const offset = Math.max(
+        0,
+        Number.parseInt(String(req.query.offset ?? "0"), 10) || 0
+      );
       const ids = await listSavedUserIds();
-      const limitedIds = ids.slice(0, limit);
+      const sortedIds = ids.sort((a, b) =>
+        String(a).localeCompare(String(b), undefined, {
+          numeric: true,
+          sensitivity: "base",
+        })
+      );
+      const limitedIds = sortedIds.slice(offset, offset + limit);
 
       const players = {};
       let latestUpdatedAt = null;
@@ -54,8 +86,13 @@ export default async function handler(req, res) {
       return res.status(200).json({
         datastoreName: DATASTORE_NAME,
         updatedAt: latestUpdatedAt,
-        totalPlayers: Object.keys(players).length,
+        totalPlayers,
+        returnedPlayers: Object.keys(players).length,
+        offset,
+        limit,
+        hasMore: offset + limit < totalPlayers,
         source: "kv",
+        mode: "full",
         players,
       });
     }

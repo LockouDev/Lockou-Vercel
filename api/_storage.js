@@ -129,6 +129,35 @@ export async function loadUserData(userId) {
   return JSON.parse(body.result);
 }
 
+export async function hasUserData(userId) {
+  ensurePersistentStorage();
+
+  const key = getKey(userId);
+
+  if (!hasKvConfig()) {
+    return memoryStore.has(key);
+  }
+
+  try {
+    const response = await kvRequest(
+      `/sismember/${encodeURIComponent(USER_INDEX_KEY)}/${encodeURIComponent(
+        String(userId)
+      )}`,
+      { method: "GET" }
+    );
+    const body = await response.json();
+    const result = body?.result;
+
+    if (result === 1 || result === "1" || result === true) return true;
+    if (result === 0 || result === "0" || result === false) return false;
+  } catch {
+    // Fall back to direct read when set-membership is unavailable.
+  }
+
+  const found = await loadUserData(userId);
+  return Boolean(found);
+}
+
 export async function listSavedUserIds() {
   ensurePersistentStorage();
 
@@ -166,6 +195,37 @@ export async function listSavedUserIds() {
     .map((key) => String(key))
     .filter((key) => key.startsWith(USER_KEY_PREFIX))
     .map((key) => key.slice(USER_KEY_PREFIX.length));
+}
+
+export async function countSavedUsers() {
+  ensurePersistentStorage();
+
+  if (!hasKvConfig()) {
+    let count = 0;
+    for (const key of memoryStore.keys()) {
+      if (String(key).startsWith(USER_KEY_PREFIX)) {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
+  try {
+    const response = await kvRequest(
+      `/scard/${encodeURIComponent(USER_INDEX_KEY)}`,
+      { method: "GET" }
+    );
+    const body = await response.json();
+    const result = Number(body?.result);
+    if (Number.isFinite(result) && result >= 0) {
+      return result;
+    }
+  } catch {
+    // Fall back to ID listing if SCARD fails.
+  }
+
+  const ids = await listSavedUserIds();
+  return ids.length;
 }
 
 export function storageProvider() {
