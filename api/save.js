@@ -75,9 +75,23 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const expectedApiKey = process.env.ROBLOX_API_KEY;
+  const expectedApiKey = String(process.env.ROBLOX_API_KEY || "").trim();
   if (expectedApiKey) {
-    const receivedApiKey = req.headers["x-api-key"];
+    const rawHeaderKey =
+      req.headers["x-api-key"] ||
+      req.headers["X-API-KEY"] ||
+      req.headers.authorization ||
+      req.headers.Authorization ||
+      "";
+
+    const receivedRaw = Array.isArray(rawHeaderKey)
+      ? rawHeaderKey[0]
+      : rawHeaderKey;
+    const receivedTrimmed = String(receivedRaw || "").trim();
+    const receivedApiKey = receivedTrimmed.toLowerCase().startsWith("bearer ")
+      ? receivedTrimmed.slice(7).trim()
+      : receivedTrimmed;
+
     if (receivedApiKey !== expectedApiKey) {
       return res.status(401).json({ error: "Invalid API key" });
     }
