@@ -72,7 +72,7 @@ function App() {
         <section id="portfolio" className="panel section">
           <header className="section-head">
             <h2>Portfólio</h2>
-            <p>Em atualização.</p>
+            <p>Em atualização</p>
           </header>
         </section>
 
@@ -108,9 +108,6 @@ function App() {
                   src="https://img.icons8.com/ios-filled/50/4ea9ff/roblox.png"
                   alt="roblox"
                   className="contact-icon-image"
-                  draggable="false"
-                  onDragStart={(event) => event.preventDefault()}
-                  onContextMenu={(event) => event.preventDefault()}
                 />
               </span>
               <div className="contact-content">
