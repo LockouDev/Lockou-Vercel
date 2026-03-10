@@ -29,23 +29,21 @@ function resolveAccurateFlag(value) {
   return isEnabled(value);
 }
 
-function resolveCoreOnlyFlag(value) {
-  if (value === undefined || value === null || value === "") {
-    return true;
-  }
-  return isEnabled(value);
-}
-
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("x-filter-mode", "important-only-v1");
+
   try {
     const provider = storageProvider();
     if (provider === "kv") {
       const accurate = resolveAccurateFlag(req.query.accurate);
-      const coreOnly = resolveCoreOnlyFlag(req.query.coreOnly);
+      const coreOnly = true;
       const full = isEnabled(req.query.full);
       const totalPlayers = accurate
         ? (await listSavedUserIds({ forceKeys: true })).length
@@ -60,6 +58,7 @@ export default async function handler(req, res) {
           mode: "summary",
           accurate,
           coreOnly,
+          filterMode: "important-only-v1",
           players: {},
         });
       }
@@ -95,7 +94,7 @@ export default async function handler(req, res) {
 
         for (const item of records) {
           if (!item.record?.data) continue;
-          if (coreOnly && !hasImportantTemplateData(item.record.data)) continue;
+          if (!hasImportantTemplateData(item.record.data)) continue;
           players[item.id] = item.record.data;
 
           const current = item.record.updatedAt || null;
@@ -117,6 +116,7 @@ export default async function handler(req, res) {
         mode: "full",
         accurate,
         coreOnly,
+        filterMode: "important-only-v1",
         players,
       });
     }

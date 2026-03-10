@@ -1,5 +1,8 @@
 {
     "name": "roblox-api",
     "version": "1.0.0",
-    "private": true
+    "private": true,
+    "scripts": {
+        "export:redis": "node scripts/export-redis-to-json.cjs"
+    }
 }

@@ -28,17 +28,15 @@ function resolveAccurateFlag(value) {
   return isEnabled(value);
 }
 
-function resolveCoreOnlyFlag(value) {
-  if (value === undefined || value === null || value === "") {
-    return true;
-  }
-  return isEnabled(value);
-}
-
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("x-filter-mode", "important-only-v1");
 
   try {
     const limit = Math.min(toPositiveInt(req.query.limit, 250), 2000);
@@ -48,7 +46,7 @@ export default async function handler(req, res) {
     );
     const includeMeta = isEnabled(req.query.meta);
     const accurate = resolveAccurateFlag(req.query.accurate);
-    const coreOnly = resolveCoreOnlyFlag(req.query.coreOnly);
+    const coreOnly = true;
 
     if (storageProvider() === "kv") {
       const ids = await listSavedUserIds({ forceKeys: accurate });
@@ -78,7 +76,7 @@ export default async function handler(req, res) {
 
         for (const item of records) {
           if (!item.record?.data) continue;
-          if (coreOnly && !hasImportantTemplateData(item.record.data)) continue;
+          if (!hasImportantTemplateData(item.record.data)) continue;
 
           players[item.userId] = normalizePlayerData(
             item.userId,
@@ -105,6 +103,7 @@ export default async function handler(req, res) {
         updatedAt: latestUpdatedAt,
         accurate,
         coreOnly,
+        filterMode: "important-only-v1",
         players,
       });
     }
@@ -121,7 +120,7 @@ export default async function handler(req, res) {
 
     for (const userId of selectedIds) {
       const rawData = doc.players[userId];
-      if (coreOnly && !hasImportantTemplateData(rawData)) continue;
+      if (!hasImportantTemplateData(rawData)) continue;
       players[userId] = normalizePlayerData(userId, rawData);
     }
 
@@ -138,6 +137,7 @@ export default async function handler(req, res) {
       updatedAt: doc.updatedAt || null,
       accurate: true,
       coreOnly,
+      filterMode: "important-only-v1",
       players,
     });
   } catch (error) {
