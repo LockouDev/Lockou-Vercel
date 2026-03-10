@@ -408,6 +408,10 @@ a {
   width: 20px;
   height: 20px;
   object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 .contact-content {
