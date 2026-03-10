@@ -435,6 +435,9 @@ a {
 
 .contact-content a {
   transition: border-color 180ms ease, color 180ms ease;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
 }
 
 .contact-content a:hover {
@@ -466,9 +469,13 @@ a {
   .header-shell {
     min-height: auto;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-between;
     padding-top: 12px;
     padding-bottom: 12px;
+  }
+
+  .brand {
+    margin-right: auto;
   }
 
   .nav-links {
@@ -476,12 +483,133 @@ a {
     justify-content: center;
     order: 3;
     width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .nav-links a {
+    text-align: center;
+    padding: 9px 8px;
+  }
+
+  .header-cta {
+    margin-left: 0;
   }
 }
 
 @media (max-width: 640px) {
+  .page {
+    padding: 18px 12px 24px;
+    gap: 12px;
+  }
+
+  .panel {
+    border-radius: 20px;
+  }
+
+  .hero {
+    padding: 18px;
+  }
+
+  .hero-grid {
+    gap: 16px;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 12vw, 3.35rem);
+    max-width: 10ch;
+  }
+
+  .hero-actions {
+    gap: 10px;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
   .hero-visual {
-    min-height: 330px;
+    min-height: 250px;
+  }
+
+  .visual-core {
+    width: 128px;
+    height: 128px;
+    border-radius: 30px;
+  }
+
+  .visual-line {
+    display: none;
+  }
+
+  .section {
+    padding: 18px;
+  }
+
+  .section-head p {
+    font-size: 0.95rem;
+  }
+
+  .contact-list li {
+    grid-template-columns: 34px 1fr;
+    padding: 10px 11px;
+    gap: 8px 10px;
+  }
+
+  .contact-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    font-size: 0.96rem;
+  }
+
+  .contact-icon-image {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .header-shell {
+    padding: 8px 10px;
+    gap: 10px;
+  }
+
+  .nav-links a {
+    font-size: 0.84rem;
+    padding: 7px 5px;
+  }
+
+  .header-cta {
+    order: 4;
+    width: 100%;
+    text-align: center;
+    margin-top: 2px;
+  }
+
+  .page {
+    padding: 14px 10px 22px;
+  }
+
+  .hero-visual {
+    min-height: 220px;
+  }
+
+  .visual-core {
+    width: 112px;
+    height: 112px;
+    border-radius: 26px;
+  }
+
+  .eyebrow {
+    font-size: 0.68rem;
+    padding: 5px 10px;
+  }
+
+  .contact-content a,
+  .contact-content strong {
+    font-size: 0.92rem;
   }
 }
 
