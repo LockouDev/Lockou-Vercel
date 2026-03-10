@@ -24,6 +24,16 @@ const DEFAULT_PLAYER_TEMPLATE = {
   purchasedSongs: {},
 };
 
+const CORE_INVENTORY_FIELDS = [
+  "Gamepasses",
+  "FavoriteDances",
+  "Tools",
+  "Hoverboards",
+  "Pets",
+  "Auras",
+  "Hats",
+];
+
 function isPlainObject(value) {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
@@ -121,6 +131,18 @@ function mergeWithTemplate(templateValue, dataValue) {
   return deepClone(dataValue);
 }
 
+function hasEntries(value) {
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  if (isPlainObject(value)) {
+    return Object.keys(value).length > 0;
+  }
+
+  return false;
+}
+
 export function normalizePlayerData(userId, rawData) {
   const normalized = mergeWithTemplate(DEFAULT_PLAYER_TEMPLATE, rawData);
   if (
@@ -133,6 +155,25 @@ export function normalizePlayerData(userId, rawData) {
     normalized.pId = Number.isFinite(asNumber) ? asNumber : String(userId);
   }
   return normalized;
+}
+
+export function hasImportantTemplateData(rawData) {
+  if (!isPlainObject(rawData)) {
+    return false;
+  }
+
+  const donations = Number(rawData.Donations);
+  if (Number.isFinite(donations) && donations > 0) {
+    return true;
+  }
+
+  for (const field of CORE_INVENTORY_FIELDS) {
+    if (hasEntries(rawData[field])) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function isPlayerTemplateEmpty(rawData) {

@@ -5,6 +5,7 @@ import {
   storageProvider,
 } from "./_storage.js";
 import { readAllPlayersFromFile } from "./_stepMusicFile.js";
+import { hasImportantTemplateData } from "./_template.js";
 
 const DATASTORE_NAME = "21/07/2024";
 const LOAD_CHUNK = 25;
@@ -28,6 +29,13 @@ function resolveAccurateFlag(value) {
   return isEnabled(value);
 }
 
+function resolveCoreOnlyFlag(value) {
+  if (value === undefined || value === null || value === "") {
+    return true;
+  }
+  return isEnabled(value);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -37,6 +45,7 @@ export default async function handler(req, res) {
     const provider = storageProvider();
     if (provider === "kv") {
       const accurate = resolveAccurateFlag(req.query.accurate);
+      const coreOnly = resolveCoreOnlyFlag(req.query.coreOnly);
       const full = isEnabled(req.query.full);
       const totalPlayers = accurate
         ? (await listSavedUserIds({ forceKeys: true })).length
@@ -50,6 +59,7 @@ export default async function handler(req, res) {
           source: "kv",
           mode: "summary",
           accurate,
+          coreOnly,
           players: {},
         });
       }
@@ -85,6 +95,7 @@ export default async function handler(req, res) {
 
         for (const item of records) {
           if (!item.record?.data) continue;
+          if (coreOnly && !hasImportantTemplateData(item.record.data)) continue;
           players[item.id] = item.record.data;
 
           const current = item.record.updatedAt || null;
@@ -105,6 +116,7 @@ export default async function handler(req, res) {
         source: "kv",
         mode: "full",
         accurate,
+        coreOnly,
         players,
       });
     }

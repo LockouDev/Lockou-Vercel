@@ -1,5 +1,5 @@
 import { hasUserData, saveUserData, storageProvider } from "./_storage.js";
-import { isPlayerTemplateEmpty } from "./_template.js";
+import { hasImportantTemplateData, isPlayerTemplateEmpty } from "./_template.js";
 import {
   getStepMusicDataFilePath,
   upsertPlayersInFile,
@@ -120,6 +120,10 @@ export default async function handler(req, res) {
     body.skipEmptyTemplates === undefined
       ? true
       : toBoolean(body.skipEmptyTemplates);
+  const requireImportantData =
+    body.requireImportantData === undefined
+      ? true
+      : toBoolean(body.requireImportantData);
 
   if (entries.length === 0) {
     return res.status(400).json({
@@ -129,13 +133,27 @@ export default async function handler(req, res) {
   }
 
   try {
-    let entriesToCheck = entries;
+    let entriesAfterImportance = entries;
+    const ignoredNoImportantUsers = [];
+
+    if (requireImportantData) {
+      entriesAfterImportance = [];
+      for (const entry of entries) {
+        if (!hasImportantTemplateData(entry.data)) {
+          ignoredNoImportantUsers.push(entry.userId);
+          continue;
+        }
+        entriesAfterImportance.push(entry);
+      }
+    }
+
+    let entriesToCheck = entriesAfterImportance;
     const ignoredEmptyUsers = [];
     let existingSkippedUsers = [];
 
     if (skipEmptyTemplates) {
       entriesToCheck = [];
-      for (const entry of entries) {
+      for (const entry of entriesAfterImportance) {
         if (isPlayerTemplateEmpty(entry.data)) {
           ignoredEmptyUsers.push(entry.userId);
           continue;
@@ -169,7 +187,11 @@ export default async function handler(req, res) {
       );
     }
 
-    const skippedUsers = [...ignoredEmptyUsers, ...existingSkippedUsers];
+    const skippedUsers = [
+      ...ignoredNoImportantUsers,
+      ...ignoredEmptyUsers,
+      ...existingSkippedUsers,
+    ];
 
     if (entriesToSave.length === 0) {
       return res.status(200).json({
@@ -180,12 +202,15 @@ export default async function handler(req, res) {
         totalFailed: 0,
         skippedUsers,
         totalSkipped: skippedUsers.length,
+        ignoredNoImportantUsers,
+        totalIgnoredNoImportant: ignoredNoImportantUsers.length,
         ignoredEmptyUsers,
         totalIgnoredEmpty: ignoredEmptyUsers.length,
         totalReceived: entries.length,
         totalChecked: entriesToCheck.length,
         skipExisting,
         skipEmptyTemplates,
+        requireImportantData,
         provider: storageProvider(),
         kvFailed: 0,
         fileSync: {
@@ -258,12 +283,15 @@ export default async function handler(req, res) {
         totalFailed: kvFailed,
         skippedUsers,
         totalSkipped: skippedUsers.length,
+        ignoredNoImportantUsers,
+        totalIgnoredNoImportant: ignoredNoImportantUsers.length,
         ignoredEmptyUsers,
         totalIgnoredEmpty: ignoredEmptyUsers.length,
         totalReceived: entries.length,
         totalChecked: entriesToCheck.length,
         skipExisting,
         skipEmptyTemplates,
+        requireImportantData,
         provider: storageProvider(),
         kvFailed,
         fileSync,
@@ -278,12 +306,15 @@ export default async function handler(req, res) {
       totalFailed: kvFailed,
       skippedUsers,
       totalSkipped: skippedUsers.length,
+      ignoredNoImportantUsers,
+      totalIgnoredNoImportant: ignoredNoImportantUsers.length,
       ignoredEmptyUsers,
       totalIgnoredEmpty: ignoredEmptyUsers.length,
       totalReceived: entries.length,
       totalChecked: entriesToCheck.length,
       skipExisting,
       skipEmptyTemplates,
+      requireImportantData,
       provider: storageProvider(),
       kvFailed,
       fileSync,

@@ -5,7 +5,7 @@ import {
   storageProvider,
 } from "./_storage.js";
 import { readAllPlayersFromFile } from "./_stepMusicFile.js";
-import { normalizePlayerData } from "./_template.js";
+import { hasImportantTemplateData, normalizePlayerData } from "./_template.js";
 
 const LOAD_CHUNK = 25;
 
@@ -28,6 +28,13 @@ function resolveAccurateFlag(value) {
   return isEnabled(value);
 }
 
+function resolveCoreOnlyFlag(value) {
+  if (value === undefined || value === null || value === "") {
+    return true;
+  }
+  return isEnabled(value);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -41,6 +48,7 @@ export default async function handler(req, res) {
     );
     const includeMeta = isEnabled(req.query.meta);
     const accurate = resolveAccurateFlag(req.query.accurate);
+    const coreOnly = resolveCoreOnlyFlag(req.query.coreOnly);
 
     if (storageProvider() === "kv") {
       const ids = await listSavedUserIds({ forceKeys: accurate });
@@ -70,7 +78,12 @@ export default async function handler(req, res) {
 
         for (const item of records) {
           if (!item.record?.data) continue;
-          players[item.userId] = normalizePlayerData(item.userId, item.record.data);
+          if (coreOnly && !hasImportantTemplateData(item.record.data)) continue;
+
+          players[item.userId] = normalizePlayerData(
+            item.userId,
+            item.record.data
+          );
 
           const current = item.record.updatedAt || null;
           if (current && (!latestUpdatedAt || current > latestUpdatedAt)) {
@@ -91,6 +104,7 @@ export default async function handler(req, res) {
         hasMore: offset + limit < totalPlayers,
         updatedAt: latestUpdatedAt,
         accurate,
+        coreOnly,
         players,
       });
     }
@@ -106,7 +120,9 @@ export default async function handler(req, res) {
     const players = {};
 
     for (const userId of selectedIds) {
-      players[userId] = normalizePlayerData(userId, doc.players[userId]);
+      const rawData = doc.players[userId];
+      if (coreOnly && !hasImportantTemplateData(rawData)) continue;
+      players[userId] = normalizePlayerData(userId, rawData);
     }
 
     if (!includeMeta) {
@@ -121,6 +137,7 @@ export default async function handler(req, res) {
       hasMore: offset + limit < ids.length,
       updatedAt: doc.updatedAt || null,
       accurate: true,
+      coreOnly,
       players,
     });
   } catch (error) {
