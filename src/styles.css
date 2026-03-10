@@ -410,11 +410,6 @@ a {
   object-fit: contain;
 }
 
-.contact-icon--roblox {
-  background: #f2f6ff;
-  border-color: rgba(130, 179, 255, 0.66);
-}
-
 .contact-content {
   display: grid;
   gap: 2px;

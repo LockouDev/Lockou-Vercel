@@ -101,11 +101,11 @@ function App() {
               </div>
             </li>
             <li>
-              <span className="contact-icon contact-icon--roblox" aria-hidden="true">
+              <span className="contact-icon" aria-hidden="true">
                 <img
                   width="50"
                   height="50"
-                  src="https://img.icons8.com/ios-filled/50/roblox.png"
+                  src="https://img.icons8.com/ios-filled/50/4ea9ff/roblox.png"
                   alt="roblox"
                   className="contact-icon-image"
                 />
