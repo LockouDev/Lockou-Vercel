@@ -18,6 +18,12 @@ function AdminApp() {
     error: ""
   });
   const [logoutState, setLogoutState] = useState("idle");
+  const [playerId, setPlayerId] = useState("89879612");
+  const [lookupState, setLookupState] = useState({
+    status: "idle",
+    payload: null,
+    error: ""
+  });
 
   useEffect(() => {
     let active = true;
@@ -74,6 +80,41 @@ function AdminApp() {
       });
     } finally {
       window.location.replace("/admin-login");
+    }
+  }
+
+  async function handlePlayerLookup(event) {
+    event.preventDefault();
+    setLookupState({
+      status: "loading",
+      payload: null,
+      error: ""
+    });
+
+    try {
+      const response = await fetch(
+        `/api/admin/roblox-player?playerId=${encodeURIComponent(playerId.trim())}`,
+        {
+          credentials: "include"
+        }
+      );
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Failed to read player data.");
+      }
+
+      setLookupState({
+        status: "ready",
+        payload,
+        error: ""
+      });
+    } catch (error) {
+      setLookupState({
+        status: "error",
+        payload: null,
+        error: error.message || "Failed to read player data."
+      });
     }
   }
 
@@ -162,6 +203,62 @@ function AdminApp() {
                 <span className="dataset-badge">{dataset.status}</span>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className="admin-shell admin-section">
+          <div className="section-head">
+            <h2>Roblox player data lookup</h2>
+            <p>Reads one DataStore entry using the player ID as the entry key.</p>
+          </div>
+
+          <form className="lookup-form" onSubmit={handlePlayerLookup}>
+            <label className="field-label" htmlFor="player-id">
+              Player ID
+            </label>
+            <div className="lookup-controls">
+              <input
+                id="player-id"
+                name="player-id"
+                type="text"
+                inputMode="numeric"
+                className="field-input"
+                value={playerId}
+                onChange={(event) => setPlayerId(event.target.value)}
+                placeholder="89879612"
+                required
+              />
+              <button
+                className="submit-button"
+                type="submit"
+                disabled={lookupState.status === "loading"}
+              >
+                {lookupState.status === "loading" ? "Reading..." : "Read data"}
+              </button>
+            </div>
+          </form>
+
+          {lookupState.error ? (
+            <p className="error-copy lookup-error">{lookupState.error}</p>
+          ) : null}
+
+          <div className="lookup-result">
+            {lookupState.payload ? (
+              <>
+                <div className="lookup-meta">
+                  <span>Entry key used: {lookupState.payload.entryKeyUsed}</span>
+                  <span>Scope: {lookupState.payload.datastoreScope}</span>
+                  <span>Store: {lookupState.payload.datastoreName}</span>
+                </div>
+                <pre className="result-code">
+                  <code>{JSON.stringify(lookupState.payload.data, null, 2)}</code>
+                </pre>
+              </>
+            ) : (
+              <p className="empty-copy">
+                Enter a player ID and read the DataStore entry using that ID as the key.
+              </p>
+            )}
           </div>
         </section>
 

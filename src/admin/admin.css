@@ -287,6 +287,19 @@ body {
   gap: 12px;
 }
 
+.lookup-form {
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.lookup-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
 .field-label {
   color: #d6e7ff;
   font-weight: 700;
@@ -312,6 +325,52 @@ body {
   color: #ffb9b9;
 }
 
+.lookup-error {
+  margin-top: 14px;
+}
+
+.lookup-result {
+  margin-top: 16px;
+  border: 1px solid rgba(111, 171, 250, 0.18);
+  border-radius: 18px;
+  background: rgba(7, 13, 24, 0.78);
+  padding: 16px;
+}
+
+.lookup-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.lookup-meta span {
+  border-radius: 999px;
+  border: 1px solid rgba(111, 171, 250, 0.2);
+  background: rgba(99, 170, 255, 0.08);
+  padding: 6px 10px;
+  color: #cfe4ff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.result-code {
+  margin: 0;
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(111, 171, 250, 0.16);
+  background: rgba(3, 8, 16, 0.9);
+  padding: 14px;
+  color: #d8ebff;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.empty-copy {
+  margin: 0;
+  color: var(--admin-muted);
+}
+
 @media (max-width: 840px) {
   .admin-page {
     padding: 18px 12px;
@@ -333,6 +392,10 @@ body {
 
   .compact-section {
     max-width: none;
+  }
+
+  .lookup-controls {
+    grid-template-columns: 1fr;
   }
 }
 
