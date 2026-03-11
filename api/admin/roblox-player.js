@@ -3,31 +3,7 @@ import {
   getSessionTokenFromRequest,
   verifySessionToken
 } from "../../lib/admin-auth.js";
-
-const OPEN_CLOUD_BASE_URL =
-  "https://apis.roblox.com/datastores/v1/universes";
-const DEFAULT_SCOPE = "global";
-
-function readRobloxConfig() {
-  return {
-    apiKey: process.env.ROBLOX_OPEN_CLOUD_API_KEY || "",
-    universeId: process.env.ROBLOX_UNIVERSE_ID || "",
-    datastoreName: process.env.ROBLOX_DATASTORE_NAME || "",
-    datastoreScope: process.env.ROBLOX_DATASTORE_SCOPE || DEFAULT_SCOPE
-  };
-}
-
-function parseRobloxBody(bodyText) {
-  if (!bodyText) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(bodyText);
-  } catch {
-    return bodyText;
-  }
-}
+import { readDatastoreEntry } from "../../lib/roblox-open-cloud.js";
 
 export default {
   async fetch(request) {
@@ -35,18 +11,6 @@ export default {
 
     if (!session) {
       return createJsonResponse({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { apiKey, universeId, datastoreName, datastoreScope } = readRobloxConfig();
-
-    if (!apiKey || !universeId || !datastoreName) {
-      return createJsonResponse(
-        {
-          error:
-            "Missing Roblox Open Cloud environment variables. Check ROBLOX_OPEN_CLOUD_API_KEY, ROBLOX_UNIVERSE_ID and ROBLOX_DATASTORE_NAME."
-        },
-        { status: 500 }
-      );
     }
 
     const url = new URL(request.url);
@@ -59,45 +23,23 @@ export default {
       );
     }
 
-    const robloxUrl = new URL(
-      `${OPEN_CLOUD_BASE_URL}/${encodeURIComponent(
-        universeId
-      )}/standard-datastores/datastore/entries/entry`
-    );
+    const result = await readDatastoreEntry(playerId);
 
-    robloxUrl.searchParams.set("datastoreName", datastoreName);
-    robloxUrl.searchParams.set("entryKey", playerId);
-    robloxUrl.searchParams.set("scope", datastoreScope);
-
-    const robloxResponse = await fetch(robloxUrl, {
-      method: "GET",
-      headers: {
-        "x-api-key": apiKey
-      }
-    });
-
-    const robloxText = await robloxResponse.text();
-    const robloxPayload = parseRobloxBody(robloxText);
-
-    if (!robloxResponse.ok) {
+    if (!result.ok) {
       return createJsonResponse(
         {
-          error: "Roblox Open Cloud request failed.",
+          error:
+            result.kind === "config"
+              ? result.error
+              : "Roblox Open Cloud request failed.",
           playerId,
           entryKeyUsed: playerId,
-          datastoreName,
-          datastoreScope,
-          robloxStatus: robloxResponse.status,
-          robloxPayload
+          datastoreName: result.datastoreName,
+          datastoreScope: result.datastoreScope,
+          robloxStatus: result.robloxStatus,
+          robloxPayload: result.robloxPayload
         },
-        {
-          status:
-            robloxResponse.status === 404
-              ? 404
-              : robloxResponse.status >= 400 && robloxResponse.status < 600
-                ? robloxResponse.status
-                : 502
-        }
+        { status: result.status }
       );
     }
 
@@ -105,9 +47,9 @@ export default {
       ok: true,
       playerId,
       entryKeyUsed: playerId,
-      datastoreName,
-      datastoreScope,
-      data: robloxPayload
+      datastoreName: result.datastoreName,
+      datastoreScope: result.datastoreScope,
+      data: result.data
     });
   }
 };
