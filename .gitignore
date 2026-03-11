@@ -1,10 +1,17 @@
 # Dependencies
 node_modules/
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
 
 # Build outputs
 dist/
 build/
 dist-ssr/
+.cache/
 
 # Vercel
 .vercel/
@@ -21,6 +28,8 @@ pnpm-debug.log*
 .env
 .env.*
 !.env.example
+.envrc
+*.local
 
 # Test outputs
 coverage/
@@ -38,6 +47,8 @@ tmp/
 temp/
 *.tmp
 *.swp
+*.bak
+*.orig
 
 # OS / editor
 .DS_Store
