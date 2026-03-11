@@ -1,65 +1,111 @@
 import {
   createJsonResponse,
-  getSessionTokenFromRequest,
-  verifySessionToken
+  requireAdminSession
 } from "../../lib/admin-auth.js";
+import { listAdminAuditEvents } from "../../lib/admin-audit.js";
+import {
+  listAdminPermissions,
+  listRolePermissionConfigs
+} from "../../lib/admin-roles.js";
 import { getMigrationControlState } from "../../lib/admin-settings.js";
+import {
+  getAvailableAdminRoles,
+  listActiveAdminUsers,
+  listPendingAdminUsers
+} from "../../lib/admin-users.js";
+
+function buildActivityList(capabilities) {
+  const activity = [];
+
+  if (capabilities.canManageUsers) {
+    activity.push("Approve new admin requests");
+    activity.push("Adjust roles for the team");
+    activity.push("Review recent permission changes");
+  }
+
+  if (capabilities.canManageRolePermissions) {
+    activity.push("Customize what each admin role can access");
+  }
+
+  if (capabilities.canControlMigration) {
+    activity.push("Control the Roblox migration flow");
+  }
+
+  if (capabilities.canReadRobloxData) {
+    activity.push("Read Roblox DataStore entries");
+  }
+
+  return activity;
+}
 
 export default {
   async fetch(request) {
-    const session = await verifySessionToken(getSessionTokenFromRequest(request));
+    const { session, response } = await requireAdminSession(request);
 
-    if (!session) {
-      return createJsonResponse({ error: "Unauthorized" }, { status: 401 });
+    if (response) {
+      return response;
     }
 
-    const migrationControl = await getMigrationControlState();
+    const migrationControl = session.capabilities.canControlMigration
+      ? await getMigrationControlState()
+      : null;
+
+    const pendingUsers = session.capabilities.canManageUsers
+      ? await listPendingAdminUsers()
+      : [];
+
+    const activeUsers = session.capabilities.canManageUsers
+      ? await listActiveAdminUsers()
+      : [];
+
+    const auditEvents = session.capabilities.canManageUsers
+      ? await listAdminAuditEvents(18)
+      : [];
+
+    const rolePermissions = session.capabilities.canManageRolePermissions
+      ? await listRolePermissionConfigs()
+      : [];
 
     return createJsonResponse({
       heading: "Lockou Admin",
-      environment: "Restricted",
+      environment: session.safeUser.roleLabel,
       updatedAt: new Date().toISOString(),
+      currentUser: session.safeUser,
+      capabilities: session.capabilities,
+      availableRoles: getAvailableAdminRoles(session.user),
       overviewCards: [
         {
-          label: "Roblox data sources",
-          value: "Pending wiring"
+          label: "Signed in as",
+          value: session.safeUser.username
         },
         {
-          label: "API status",
-          value: "Standby"
+          label: "Role",
+          value: session.safeUser.roleLabel
         },
         {
-          label: "Access mode",
-          value: "Cookie protected"
+          label: "Pending requests",
+          value: session.capabilities.canManageUsers
+            ? String(pendingUsers.length)
+            : "Hidden"
         },
         {
           label: "Game migration",
-          value: migrationControl.enabled ? "Enabled" : "Disabled"
+          value: migrationControl
+            ? migrationControl.enabled
+              ? "Enabled"
+              : "Disabled"
+            : "Hidden"
         }
       ],
-      datasets: [
-        {
-          name: "Profile data",
-          status: "Reserved",
-          notes: "Slot ready for Roblox profile payloads"
-        },
-        {
-          name: "Group data",
-          status: "Reserved",
-          notes: "Slot ready for group metrics and snapshots"
-        },
-        {
-          name: "Economy data",
-          status: "Reserved",
-          notes: "Slot ready for limiteds, RAP and market data"
-        }
-      ],
-      activity: [
-        "Add Roblox API fields",
-        "Map private datasets",
-        "Create filters and actions"
-      ],
-      migrationControl
+      migrationControl,
+      availablePermissions: session.capabilities.canManageRolePermissions
+        ? listAdminPermissions()
+        : [],
+      rolePermissions,
+      pendingUsers,
+      activeUsers,
+      auditEvents,
+      activity: buildActivityList(session.capabilities)
     });
   }
 };

@@ -1,10 +1,14 @@
 import {
   clearSessionCookie,
-  createJsonResponse
+  createJsonResponse,
+  deleteAdminSession,
+  getSessionTokenFromRequest
 } from "../../lib/admin-auth.js";
 
 export default {
-  fetch() {
+  async fetch(request) {
+    await deleteAdminSession(getSessionTokenFromRequest(request));
+
     return createJsonResponse(
       { ok: true },
       {

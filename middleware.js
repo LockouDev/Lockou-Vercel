@@ -1,7 +1,6 @@
 import {
   createJsonResponse,
-  getSessionTokenFromRequest,
-  verifySessionToken
+  getAuthenticatedSession
 } from "./lib/admin-auth.js";
 
 export const config = {
@@ -11,11 +10,11 @@ export const config = {
 export default async function middleware(request) {
   const { pathname } = new URL(request.url);
 
-  if (pathname === "/api/admin/login") {
+  if (pathname === "/api/admin/login" || pathname === "/api/admin/register") {
     return;
   }
 
-  const session = await verifySessionToken(getSessionTokenFromRequest(request));
+  const session = await getAuthenticatedSession(request);
 
   if (session) {
     return;

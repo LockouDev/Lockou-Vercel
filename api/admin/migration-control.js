@@ -1,29 +1,21 @@
 import {
   createJsonResponse,
-  getSessionTokenFromRequest,
-  verifySessionToken
+  requireAdminSession
 } from "../../lib/admin-auth.js";
 import {
   getMigrationControlState,
   setMigrationControlState
 } from "../../lib/admin-settings.js";
 
-async function requireSession(request) {
-  const session = await verifySessionToken(getSessionTokenFromRequest(request));
-
-  if (!session) {
-    return createJsonResponse({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  return null;
-}
-
 export default {
   async fetch(request) {
-    const unauthorizedResponse = await requireSession(request);
+    const { response } = await requireAdminSession(
+      request,
+      "migration.control.write"
+    );
 
-    if (unauthorizedResponse) {
-      return unauthorizedResponse;
+    if (response) {
+      return response;
     }
 
     if (request.method === "GET") {
@@ -67,11 +59,9 @@ export default {
     } catch (error) {
       return createJsonResponse(
         {
-          error:
-            error.message ||
-            "Failed to update the migration control setting"
+          error: error.message || "Failed to update the migration control setting"
         },
-        { status: 409 }
+        { status: error.status || 409 }
       );
     }
   }

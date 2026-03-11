@@ -1,16 +1,15 @@
 import {
   createJsonResponse,
-  getSessionTokenFromRequest,
-  verifySessionToken
+  requireAdminSession
 } from "../../lib/admin-auth.js";
 import { readDatastoreEntry } from "../../lib/roblox-open-cloud.js";
 
 export default {
   async fetch(request) {
-    const session = await verifySessionToken(getSessionTokenFromRequest(request));
+    const { response } = await requireAdminSession(request, "roblox.data.read");
 
-    if (!session) {
-      return createJsonResponse({ error: "Unauthorized" }, { status: 401 });
+    if (response) {
+      return response;
     }
 
     const url = new URL(request.url);
