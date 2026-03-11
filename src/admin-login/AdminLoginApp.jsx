@@ -172,7 +172,7 @@ function AdminLoginApp() {
                   username: event.target.value
                 }))
               }
-              placeholder="Lockou"
+              placeholder="Username"
               required
             />
 
