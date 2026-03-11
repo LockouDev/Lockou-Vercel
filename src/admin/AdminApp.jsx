@@ -28,6 +28,72 @@ function AdminLoader() {
   );
 }
 
+function ControlCard({
+  title,
+  description,
+  enabled,
+  writable,
+  status,
+  storage,
+  note,
+  error,
+  onToggle
+}) {
+  return (
+    <article className="control-card">
+      <div className="control-card__header">
+        <div>
+          <h3>{title}</h3>
+          <p>{description}</p>
+        </div>
+
+        <button
+          className={`control-switch${enabled ? " is-active" : ""}`}
+          type="button"
+          role="switch"
+          aria-checked={enabled}
+          aria-label={`${enabled ? "Disable" : "Enable"} ${title}`}
+          onClick={onToggle}
+          disabled={status === "loading" || !writable}
+        >
+          <span className="control-switch__track">
+            <span className="control-switch__core" />
+            <span className="control-switch__thumb" />
+          </span>
+        </button>
+      </div>
+
+      <div className="lookup-meta control-card__meta">
+        <span>State: {enabled ? "Enabled" : "Disabled"}</span>
+        <span>Storage: {storage}</span>
+        <span>Mode: {writable ? "Live writable" : "Read only"}</span>
+      </div>
+
+      <p className="support-copy control-card__copy">
+        {error || note || "No details available for this control."}
+      </p>
+
+      <div className="control-card__footer">
+        <span className="control-card__status">
+          {status === "loading"
+            ? "Saving..."
+            : enabled
+              ? "Currently active"
+              : "Currently paused"}
+        </span>
+        <button
+          className="ghost-button"
+          type="button"
+          onClick={onToggle}
+          disabled={status === "loading" || !writable}
+        >
+          {enabled ? "Disable" : "Enable"}
+        </button>
+      </div>
+    </article>
+  );
+}
+
 function AdminApp() {
   const [state, setState] = useState({
     status: "loading",
@@ -304,46 +370,25 @@ function AdminApp() {
 
         <section className="admin-shell admin-section">
           <div className="section-head">
-            <h2>Migration control</h2>
-            <p>Turns the game migration endpoints on or off globally.</p>
+            <h2>Control center</h2>
+            <p>Central place for live switches that affect private admin features.</p>
           </div>
 
-          <div className="control-row">
-            <div className="control-summary">
-              <div className="lookup-meta">
-                <span>
-                  State: {migrationControl.enabled ? "Enabled" : "Disabled"}
-                </span>
-                <span>Storage: {migrationControl.storage}</span>
-                <span>
-                  Mode: {migrationControl.writable ? "Live writable" : "Read only"}
-                </span>
-              </div>
-              <p className="support-copy control-copy">
-                {migrationControl.note ||
-                  "Use this section to pause or resume the migration endpoints."}
-              </p>
-              {migrationControl.error ? (
-                <p className="error-copy">{migrationControl.error}</p>
-              ) : null}
-            </div>
-
-            <div className="control-actions">
-              <button
-                className="submit-button"
-                type="button"
-                onClick={() => handleMigrationToggle(!migrationControl.enabled)}
-                disabled={
-                  migrationControl.status === "loading" || !migrationControl.writable
-                }
-              >
-                {migrationControl.status === "loading"
-                  ? "Saving..."
-                  : migrationControl.enabled
-                    ? "Disable migration"
-                    : "Enable migration"}
-              </button>
-            </div>
+          <div className="control-grid">
+            <ControlCard
+              title="Game migration"
+              description="Controls whether the migration endpoints answer incoming game requests."
+              enabled={migrationControl.enabled}
+              writable={migrationControl.writable}
+              status={migrationControl.status}
+              storage={migrationControl.storage}
+              note={
+                migrationControl.note ||
+                "Pause migration here without removing the backend routes."
+              }
+              error={migrationControl.error}
+              onToggle={() => handleMigrationToggle(!migrationControl.enabled)}
+            />
           </div>
         </section>
 
