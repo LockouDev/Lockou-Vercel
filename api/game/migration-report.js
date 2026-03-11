@@ -25,11 +25,11 @@ function buildDiscordMessage(payload) {
   return {
     content: truncateText(
       [
-        "Migration completed",
+        "Migração feita!",
         `Player: ${playerName}`,
         `UserId: ${playerId}`,
         `Source: ${source}`,
-        `Result: ${result}`
+        `Resultado: ${result}`
       ].join("\n"),
       1900
     )
