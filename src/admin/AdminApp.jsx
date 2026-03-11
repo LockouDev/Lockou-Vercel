@@ -8,8 +8,8 @@ const PERMISSION_LABELS = {
 
 const ROLE_PRIORITY = {
   supreme: 0,
-  moderator: 1,
-  reader: 2
+  reader: 1,
+  moderator: 2
 };
 
 function formatTimestamp(value) {
@@ -71,7 +71,7 @@ function getRoleAccessSummary(role) {
     return "Operational access";
   }
 
-  return "Read focused access";
+  return "Standard access";
 }
 
 function formatPermissionLabel(permission) {
