@@ -1442,3 +1442,46 @@ body {
     min-width: 200px;
   }
 }
+
+.admin-page {
+  padding: 0 20px 20px 0;
+}
+
+.admin-layout {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 20px;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  top: 0;
+  min-height: 100vh;
+  padding: 28px 18px;
+  border-left: 0;
+  border-top: 0;
+  border-bottom: 0;
+  border-radius: 0 28px 28px 0;
+}
+
+.admin-main {
+  padding-top: 20px;
+}
+
+@media (max-width: 1080px) {
+  .admin-page {
+    padding: 18px 12px;
+  }
+
+  .admin-sidebar {
+    min-height: auto;
+    border: 1px solid var(--admin-line);
+    border-radius: 24px;
+  }
+
+  .admin-main {
+    padding-top: 0;
+  }
+}
