@@ -236,6 +236,44 @@ function SidebarNavItem({ tab, active, onSelect }) {
   );
 }
 
+function RobloxConnectCard({ currentUser }) {
+  const connected = Boolean(currentUser.robloxUserId && currentUser.robloxAvatarUrl);
+
+  return (
+    <section className="admin-shell admin-section compact-section">
+      <div className="section-head">
+        <h2>Roblox account</h2>
+        <p>Connect your Roblox profile to show the real avatar icon in the sidebar</p>
+      </div>
+
+      <div className="roblox-connect-card">
+        <div className="lookup-meta">
+          <span>{connected ? "Connected" : "Not connected"}</span>
+          {currentUser.robloxUsername ? (
+            <span>Roblox: {currentUser.robloxUsername}</span>
+          ) : null}
+        </div>
+
+        <div className="member-card__actions">
+          <a className="submit-button roblox-connect-button" href="/api/admin/roblox/connect">
+            {connected ? "Reconnect Roblox" : "Connect Roblox"}
+          </a>
+          {currentUser.robloxProfileUrl ? (
+            <a
+              className="secondary-button roblox-connect-button"
+              href={currentUser.robloxProfileUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open profile
+            </a>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ControlCard({
   title,
   description,
@@ -886,6 +924,8 @@ function AdminApp() {
               ))}
             </ul>
           </section>
+
+          <RobloxConnectCard currentUser={currentUser} />
         </>
       );
     }
@@ -1147,10 +1187,25 @@ function AdminApp() {
           </div>
 
           <div className="sidebar-profile">
-            <div className="sidebar-avatar">{getUserInitials(currentUser.username)}</div>
+            <div className="sidebar-avatar">
+              {currentUser.robloxAvatarUrl ? (
+                <img
+                  className="sidebar-avatar__image"
+                  src={currentUser.robloxAvatarUrl}
+                  alt={currentUser.robloxUsername || currentUser.username}
+                  draggable="false"
+                />
+              ) : (
+                getUserInitials(currentUser.username)
+              )}
+            </div>
             <div className="sidebar-profile__copy">
               <strong>{currentUser.username}</strong>
-              <span>{currentUser.roleLabel}</span>
+              <span>
+                {currentUser.robloxUsername
+                  ? `${currentUser.roleLabel} • @${currentUser.robloxUsername}`
+                  : currentUser.roleLabel}
+              </span>
               <div className="sidebar-profile__meta">
                 <span>{currentUser.permissions.length} permissions</span>
                 <span>{currentUser.status}</span>
