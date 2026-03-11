@@ -62,18 +62,20 @@ function AdminLoginApp() {
 
           {error ? <p className="error-copy">{error}</p> : null}
 
-          <button
-            className="submit-button"
-            type="submit"
-            disabled={status === "loading"}
-          >
-            {status === "loading" ? "Checking..." : "Enter admin"}
-          </button>
-        </form>
+          <div className="login-actions">
+            <button
+              className="submit-button"
+              type="submit"
+              disabled={status === "loading"}
+            >
+              {status === "loading" ? "Checking..." : "Enter admin"}
+            </button>
 
-        <a className="ghost-link" href="/">
-          Back to public site
-        </a>
+            <a className="ghost-link" href="/">
+              Back to public site
+            </a>
+          </div>
+        </form>
       </div>
     </div>
   );

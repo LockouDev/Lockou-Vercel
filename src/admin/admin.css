@@ -287,6 +287,18 @@ body {
   gap: 12px;
 }
 
+.login-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.login-actions .submit-button,
+.login-actions .ghost-link {
+  width: 100%;
+  min-height: 48px;
+}
+
 .lookup-form {
   margin-top: 18px;
   display: grid;
