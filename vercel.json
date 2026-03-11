@@ -8,6 +8,18 @@
     {
       "source": "/admin-login",
       "destination": "/admin-login.html"
+    },
+    {
+      "source": "/roblox-oauth",
+      "destination": "/roblox-oauth.html"
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy-policy.html"
+    },
+    {
+      "source": "/terms-of-service",
+      "destination": "/terms-of-service.html"
     }
   ]
 }
