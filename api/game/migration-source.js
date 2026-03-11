@@ -1,23 +1,9 @@
 import { createJsonResponse } from "../../lib/admin-auth.js";
+import {
+  readGameMigrationSecret,
+  safeCompareSecrets
+} from "../../lib/game-migration-auth.js";
 import { readDatastoreEntry } from "../../lib/roblox-open-cloud.js";
-
-function readGameSecret() {
-  return process.env.GAME_MIGRATION_SECRET || "";
-}
-
-function safeCompare(left, right) {
-  if (!left || !right || left.length !== right.length) {
-    return false;
-  }
-
-  let mismatch = 0;
-
-  for (let index = 0; index < left.length; index += 1) {
-    mismatch |= left.charCodeAt(index) ^ right.charCodeAt(index);
-  }
-
-  return mismatch === 0;
-}
 
 function normalizeSourceData(rawData) {
   if (!rawData || typeof rawData !== "object" || Array.isArray(rawData)) {
@@ -40,7 +26,7 @@ export default {
       );
     }
 
-    const expectedSecret = readGameSecret();
+    const expectedSecret = readGameMigrationSecret();
     const providedSecret = request.headers.get("x-game-migration-secret") || "";
 
     if (!expectedSecret) {
@@ -50,7 +36,7 @@ export default {
       );
     }
 
-    if (!safeCompare(expectedSecret, providedSecret)) {
+    if (!safeCompareSecrets(expectedSecret, providedSecret)) {
       return createJsonResponse({ error: "Unauthorized" }, { status: 401 });
     }
 
