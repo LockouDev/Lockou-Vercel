@@ -11,6 +11,23 @@ function formatTimestamp(value) {
   }
 }
 
+function AdminLoader() {
+  return (
+    <div className="admin-loader" aria-hidden="true">
+      <span className="admin-loader__ring admin-loader__ring--outer" />
+      <span className="admin-loader__ring admin-loader__ring--middle" />
+      <span className="admin-loader__ring admin-loader__ring--inner" />
+      <span className="admin-loader__particle admin-loader__particle--one" />
+      <span className="admin-loader__particle admin-loader__particle--two" />
+      <span className="admin-loader__particle admin-loader__particle--three" />
+      <span className="admin-loader__core">
+        <span className="admin-loader__core-glow" />
+        <span className="admin-loader__mark">LK</span>
+      </span>
+    </div>
+  );
+}
+
 function AdminApp() {
   const [state, setState] = useState({
     status: "loading",
@@ -212,8 +229,16 @@ function AdminApp() {
     return (
       <div className="admin-page">
         <div className="admin-shell loading-shell">
-          <p className="eyebrow">Lockou Admin</p>
-          <h1>Loading restricted workspace...</h1>
+          <div className="loading-stack">
+            <AdminLoader />
+            <div className="loading-copy">
+              <p className="eyebrow">Lockou Admin</p>
+              <h1>Loading restricted workspace...</h1>
+              <p className="support-copy">
+                Preparing protected controls, Roblox tools and private admin data.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
