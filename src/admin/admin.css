@@ -1612,3 +1612,37 @@ body {
     box-shadow: var(--admin-shadow);
   }
 }
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 5;
+}
+
+.admin-layout {
+  display: block;
+  min-height: 100vh;
+}
+
+.admin-main {
+  margin-left: 260px;
+  padding: 16px 0 0 24px;
+}
+
+@media (max-width: 1080px) {
+  .admin-sidebar {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  .admin-main {
+    margin-left: 0;
+    padding: 0;
+  }
+}
