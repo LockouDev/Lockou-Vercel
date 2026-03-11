@@ -229,6 +229,31 @@ body {
   gap: 12px;
 }
 
+.control-row {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.control-summary {
+  min-width: 0;
+}
+
+.control-copy {
+  max-width: none;
+}
+
+.control-actions {
+  display: grid;
+  align-items: start;
+}
+
+.control-actions .submit-button {
+  min-width: 196px;
+}
+
 .dataset-row {
   display: flex;
   justify-content: space-between;
@@ -407,6 +432,10 @@ body {
   }
 
   .lookup-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .control-row {
     grid-template-columns: 1fr;
   }
 }

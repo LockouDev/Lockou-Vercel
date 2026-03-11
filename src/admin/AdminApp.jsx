@@ -24,6 +24,15 @@ function AdminApp() {
     payload: null,
     error: ""
   });
+  const [migrationControl, setMigrationControl] = useState({
+    status: "idle",
+    enabled: false,
+    writable: false,
+    source: "env",
+    storage: "Environment Variable",
+    note: "",
+    error: ""
+  });
 
   useEffect(() => {
     let active = true;
@@ -46,6 +55,17 @@ function AdminApp() {
         }
 
         if (active) {
+          setMigrationControl({
+            status: "ready",
+            enabled: Boolean(payload.migrationControl?.enabled),
+            writable: Boolean(payload.migrationControl?.writable),
+            source: payload.migrationControl?.source || "env",
+            storage:
+              payload.migrationControl?.storage || "Environment Variable",
+            note: payload.migrationControl?.note || "",
+            error: ""
+          });
+
           setState({
             status: "ready",
             data: payload,
@@ -118,6 +138,76 @@ function AdminApp() {
     }
   }
 
+  async function handleMigrationToggle(nextEnabled) {
+    setMigrationControl((current) => ({
+      ...current,
+      status: "loading",
+      error: ""
+    }));
+
+    try {
+      const response = await fetch("/api/admin/migration-control", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          enabled: nextEnabled
+        })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Failed to update migration state.");
+      }
+
+      setMigrationControl({
+        status: "ready",
+        enabled: Boolean(payload.enabled),
+        writable: Boolean(payload.writable),
+        source: payload.source || "env",
+        storage: payload.storage || "Environment Variable",
+        note: payload.note || "",
+        error: ""
+      });
+
+      setState((current) => {
+        if (!current.data) {
+          return current;
+        }
+
+        return {
+          ...current,
+          data: {
+            ...current.data,
+            overviewCards: current.data.overviewCards.map((card) =>
+              card.label === "Game migration"
+                ? {
+                    ...card,
+                    value: payload.enabled ? "Enabled" : "Disabled"
+                  }
+                : card
+            ),
+            migrationControl: {
+              enabled: Boolean(payload.enabled),
+              writable: Boolean(payload.writable),
+              source: payload.source || "env",
+              storage: payload.storage || "Environment Variable",
+              note: payload.note || ""
+            }
+          }
+        };
+      });
+    } catch (error) {
+      setMigrationControl((current) => ({
+        ...current,
+        status: "error",
+        error: error.message || "Failed to update migration state."
+      }));
+    }
+  }
+
   if (state.status === "loading") {
     return (
       <div className="admin-page">
@@ -184,6 +274,51 @@ function AdminApp() {
                 <strong>{card.value}</strong>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className="admin-shell admin-section">
+          <div className="section-head">
+            <h2>Migration control</h2>
+            <p>Turns the game migration endpoints on or off globally.</p>
+          </div>
+
+          <div className="control-row">
+            <div className="control-summary">
+              <div className="lookup-meta">
+                <span>
+                  State: {migrationControl.enabled ? "Enabled" : "Disabled"}
+                </span>
+                <span>Storage: {migrationControl.storage}</span>
+                <span>
+                  Mode: {migrationControl.writable ? "Live writable" : "Read only"}
+                </span>
+              </div>
+              <p className="support-copy control-copy">
+                {migrationControl.note ||
+                  "Use this section to pause or resume the migration endpoints."}
+              </p>
+              {migrationControl.error ? (
+                <p className="error-copy">{migrationControl.error}</p>
+              ) : null}
+            </div>
+
+            <div className="control-actions">
+              <button
+                className="submit-button"
+                type="button"
+                onClick={() => handleMigrationToggle(!migrationControl.enabled)}
+                disabled={
+                  migrationControl.status === "loading" || !migrationControl.writable
+                }
+              >
+                {migrationControl.status === "loading"
+                  ? "Saving..."
+                  : migrationControl.enabled
+                    ? "Disable migration"
+                    : "Enable migration"}
+              </button>
+            </div>
           </div>
         </section>
 

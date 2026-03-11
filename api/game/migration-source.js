@@ -27,7 +27,7 @@ export default {
       );
     }
 
-    if (!isGameMigrationEnabled()) {
+    if (!(await isGameMigrationEnabled())) {
       return createJsonResponse({
         ok: true,
         found: false,

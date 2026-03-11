@@ -3,6 +3,7 @@ import {
   getSessionTokenFromRequest,
   verifySessionToken
 } from "../../lib/admin-auth.js";
+import { getMigrationControlState } from "../../lib/admin-settings.js";
 
 export default {
   async fetch(request) {
@@ -11,6 +12,8 @@ export default {
     if (!session) {
       return createJsonResponse({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const migrationControl = await getMigrationControlState();
 
     return createJsonResponse({
       heading: "Lockou Admin",
@@ -28,6 +31,10 @@ export default {
         {
           label: "Access mode",
           value: "Cookie protected"
+        },
+        {
+          label: "Game migration",
+          value: migrationControl.enabled ? "Enabled" : "Disabled"
         }
       ],
       datasets: [
@@ -51,7 +58,8 @@ export default {
         "Add Roblox API fields",
         "Map private datasets",
         "Create filters and actions"
-      ]
+      ],
+      migrationControl
     });
   }
 };
