@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const PERMISSION_LABELS = {
   "admin.users.manage": "Manage admin accounts",
@@ -25,6 +25,20 @@ function formatTimestamp(value) {
   } catch {
     return value;
   }
+}
+
+function getUserInitials(value) {
+  const parts = String(value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  if (parts.length === 0) {
+    return "LK";
+  }
+
+  return parts.map((part) => part[0].toUpperCase()).join("");
 }
 
 function createRoleDraftMap(users) {
@@ -117,6 +131,75 @@ function describeAuditEvent(event) {
   };
 }
 
+function buildAdminTabs(capabilities, pendingCount) {
+  const tabs = [
+    {
+      id: "overview",
+      label: "Overview",
+      heading: "Admin overview",
+      description: "Profile, access summary and next actions",
+      icon: "bi-grid-1x2-fill"
+    }
+  ];
+
+  if (capabilities.canControlMigration) {
+    tabs.push({
+      id: "control-center",
+      label: "Control center",
+      heading: "Control center",
+      description: "Live switches for protected admin features",
+      icon: "bi-toggles2"
+    });
+  }
+
+  if (capabilities.canManageRolePermissions) {
+    tabs.push({
+      id: "role-permissions",
+      label: "Role permissions",
+      heading: "Role permissions",
+      description: "Control what each admin role can do inside this panel",
+      icon: "bi-shield-lock-fill"
+    });
+  }
+
+  if (capabilities.canManageUsers) {
+    tabs.push({
+      id: "access-requests",
+      label: "Access requests",
+      heading: "Access requests",
+      description: "Approve or reject pending admin registrations",
+      icon: "bi-person-plus-fill",
+      badge: pendingCount > 0 ? String(pendingCount) : ""
+    });
+    tabs.push({
+      id: "team",
+      label: "Team",
+      heading: "Team access",
+      description: "Review active admins and adjust their roles",
+      icon: "bi-people-fill"
+    });
+    tabs.push({
+      id: "logs",
+      label: "Logs",
+      heading: "Activity log",
+      description: "Recent approvals, rejections and role changes",
+      icon: "bi-journal-richtext"
+    });
+  }
+
+  if (capabilities.canReadRobloxData) {
+    tabs.push({
+      id: "roblox-lookup",
+      label: "Roblox data",
+      heading: "Roblox player data lookup",
+      description: "Read one DataStore entry using the player ID as the entry key",
+      icon: "bi-database-fill-gear"
+    });
+  }
+
+  return tabs;
+}
+
 function AdminLoader() {
   return (
     <div className="admin-loader" aria-hidden="true">
@@ -134,6 +217,25 @@ function AdminLoader() {
   );
 }
 
+function SidebarNavItem({ tab, active, onSelect }) {
+  return (
+    <button
+      className={`sidebar-nav__button${active ? " is-active" : ""}`}
+      type="button"
+      onClick={() => onSelect(tab.id)}
+    >
+      <span className="sidebar-nav__icon" aria-hidden="true">
+        <i className={`bi ${tab.icon}`} />
+      </span>
+      <span className="sidebar-nav__body">
+        <span className="sidebar-nav__label">{tab.label}</span>
+        <span className="sidebar-nav__caption">{tab.heading}</span>
+      </span>
+      {tab.badge ? <span className="sidebar-nav__badge">{tab.badge}</span> : null}
+    </button>
+  );
+}
+
 function ControlCard({
   title,
   description,
@@ -144,9 +246,6 @@ function ControlCard({
   error,
   onToggle
 }) {
-  const detailText =
-    error || (note === "Live toggle persisted in Redis" ? "" : note);
-
   return (
     <article className="control-card">
       <div className="control-card__header">
@@ -176,8 +275,9 @@ function ControlCard({
         <span>Mode: {writable ? "Live writable" : "Read only"}</span>
       </div>
 
-      {detailText ? (
-        <p className="support-copy control-card__copy">{detailText}</p>
+      {error ? <p className="support-copy control-card__copy">{error}</p> : null}
+      {!error && note ? (
+        <p className="support-copy control-card__copy">{note}</p>
       ) : null}
     </article>
   );
@@ -274,7 +374,6 @@ function UserCard({
     </article>
   );
 }
-
 function AuditEventCard({ event }) {
   const description = describeAuditEvent(event);
 
@@ -409,6 +508,7 @@ function AdminApp() {
     data: null,
     error: ""
   });
+  const [activeTab, setActiveTab] = useState("");
   const [logoutState, setLogoutState] = useState("idle");
   const [playerId, setPlayerId] = useState("89879612");
   const [lookupState, setLookupState] = useState({
@@ -471,6 +571,29 @@ function AdminApp() {
   useEffect(() => {
     loadOverview();
   }, [loadOverview]);
+
+  const availableTabs = useMemo(() => {
+    if (pageState.status !== "ready") {
+      return [];
+    }
+
+    return buildAdminTabs(
+      pageState.data.capabilities,
+      pageState.data.pendingUsers.length
+    );
+  }, [pageState]);
+
+  useEffect(() => {
+    if (pageState.status !== "ready" || availableTabs.length === 0) {
+      return;
+    }
+
+    const hasActiveTab = availableTabs.some((tab) => tab.id === activeTab);
+
+    if (!hasActiveTab) {
+      setActiveTab(availableTabs[0].id);
+    }
+  }, [activeTab, availableTabs, pageState.status]);
 
   async function handleLogout() {
     setLogoutState("loading");
@@ -675,336 +798,412 @@ function AdminApp() {
   }
 
   const data = pageState.data;
-  const { currentUser, capabilities } = data;
+  const { currentUser } = data;
+  const activeTabConfig =
+    availableTabs.find((tab) => tab.id === activeTab) || availableTabs[0];
 
-  return (
-    <div className="admin-page">
-      <div className="admin-grid">
-        <header className="admin-shell admin-header">
-          <div>
-            <p className="eyebrow">Restricted control room</p>
-            <h1>{data.heading}</h1>
-            <p className="support-copy">
-              Signed in as {currentUser.username} with {currentUser.roleLabel} access
-            </p>
-          </div>
+  function renderTabContent() {
+    if (!activeTabConfig) {
+      return null;
+    }
 
-          <div className="header-side">
-            <p className="status-pill">{currentUser.roleLabel}</p>
-            <button
-              className="logout-button"
-              type="button"
-              onClick={handleLogout}
-              disabled={logoutState === "loading"}
-            >
-              {logoutState === "loading" ? "Leaving" : "Logout"}
-            </button>
-          </div>
-        </header>
-
-        <section className="admin-shell admin-section">
-          <div className="section-head">
-            <h2>Overview</h2>
-            <p>Updated {formatTimestamp(data.updatedAt)}</p>
-          </div>
-
-          <div className="card-grid">
-            {data.overviewCards.map((card) => (
-              <article key={card.label} className="admin-card">
-                <p>{card.label}</p>
-                <strong>{card.value}</strong>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="admin-shell admin-section">
-          <div className="section-head">
-            <h2>My profile</h2>
-            <p>Session details and current access level</p>
-          </div>
-
-          <div className="profile-grid">
-            <article className="admin-card profile-card">
-              <p>Username</p>
-              <strong>{currentUser.username}</strong>
-            </article>
-            <article className="admin-card profile-card">
-              <p>Access level</p>
-              <strong>{currentUser.roleLabel}</strong>
-            </article>
-            <article className="admin-card profile-card">
-              <p>Member since</p>
-              <strong>{formatTimestamp(currentUser.createdAt)}</strong>
-            </article>
-            <article className="admin-card profile-card">
-              <p>Last login</p>
-              <strong>{formatTimestamp(currentUser.lastLoginAt)}</strong>
-            </article>
-          </div>
-
-          <article className="profile-panel">
-            <div className="lookup-meta profile-panel__meta">
-              <span>Status: {currentUser.status}</span>
-              {currentUser.approvedAt ? (
-                <span>Approved {formatTimestamp(currentUser.approvedAt)}</span>
-              ) : null}
-              {currentUser.approvedBy ? <span>Approved by {currentUser.approvedBy}</span> : null}
-            </div>
-
-            <div className="permission-block">
-              <h3>Permissions</h3>
-              <div className="permission-grid">
-                {currentUser.permissions.map((permission) => (
-                  <span key={permission} className="permission-chip">
-                    {formatPermissionLabel(permission)}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </article>
-        </section>
-
-        {capabilities.canControlMigration && data.migrationControl ? (
+    if (activeTabConfig.id === "overview") {
+      return (
+        <>
           <section className="admin-shell admin-section">
             <div className="section-head">
-              <h2>Control center</h2>
-              <p>Live switches for protected admin features</p>
+              <h2>Access snapshot</h2>
+              <p>Updated {formatTimestamp(data.updatedAt)}</p>
             </div>
 
-            <div className="control-grid">
-              <ControlCard
-                title="Game migration"
-                description="Controls the Roblox data migration flow that copies a player's saved data from one Roblox experience into another"
-                enabled={data.migrationControl.enabled}
-                writable={data.migrationControl.writable}
-                status={migrationState.status}
-                note={
-                  data.migrationControl.note ||
-                  "Pause migration here without removing the backend routes"
-                }
-                error={migrationState.error}
-                onToggle={() => handleMigrationToggle(!data.migrationControl.enabled)}
-              />
-            </div>
-          </section>
-        ) : null}
-
-        {capabilities.canManageRolePermissions ? (
-          <section className="admin-shell admin-section">
-            <div className="section-head">
-              <h2>Role permissions</h2>
-              <p>Control what each admin role can do inside this panel with stronger roles first</p>
-            </div>
-
-            <div className="permission-card-grid">
-              {sortRolePermissionConfigs(data.rolePermissions).map((roleConfig) => (
-                <RolePermissionCard
-                  key={roleConfig.role}
-                  roleConfig={roleConfig}
-                  availablePermissions={data.availablePermissions}
-                  draftPermissions={
-                    rolePermissionDrafts[roleConfig.role] || roleConfig.permissions
-                  }
-                  saveState={rolePermissionState}
-                  onTogglePermission={(role, permission, checked) =>
-                    setRolePermissionDrafts((current) => {
-                      const currentPermissions = current[role] || [];
-                      const nextPermissions = checked
-                        ? [...currentPermissions, permission]
-                        : currentPermissions.filter(
-                            (currentPermission) => currentPermission !== permission
-                          );
-
-                      return {
-                        ...current,
-                        [role]: data.availablePermissions
-                          .map((item) => item.value)
-                          .filter((value) => nextPermissions.includes(value))
-                      };
-                    })
-                  }
-                  onReset={(role, permissions) =>
-                    setRolePermissionDrafts((current) => ({
-                      ...current,
-                      [role]: permissions
-                    }))
-                  }
-                  onSave={handleRolePermissionSave}
-                />
+            <div className="card-grid">
+              {data.overviewCards.map((card) => (
+                <article key={card.label} className="admin-card">
+                  <p>{card.label}</p>
+                  <strong>{card.value}</strong>
+                </article>
               ))}
             </div>
           </section>
-        ) : null}
 
-        {capabilities.canManageUsers ? (
           <section className="admin-shell admin-section">
             <div className="section-head">
-              <h2>Activity log</h2>
-              <p>Recent approvals, rejections and role changes</p>
+              <h2>My profile</h2>
+              <p>Session details and current access level</p>
             </div>
 
-            <div className="audit-grid">
-              {data.auditEvents.length > 0 ? (
-                data.auditEvents.map((event) => (
-                  <AuditEventCard key={event.id} event={event} />
-                ))
-              ) : (
-                <p className="empty-copy panel-empty">
-                  No admin actions have been logged yet
-                </p>
-              )}
+            <div className="profile-grid">
+              <article className="admin-card profile-card">
+                <p>Username</p>
+                <strong>{currentUser.username}</strong>
+              </article>
+              <article className="admin-card profile-card">
+                <p>Access level</p>
+                <strong>{currentUser.roleLabel}</strong>
+              </article>
+              <article className="admin-card profile-card">
+                <p>Member since</p>
+                <strong>{formatTimestamp(currentUser.createdAt)}</strong>
+              </article>
+              <article className="admin-card profile-card">
+                <p>Last login</p>
+                <strong>{formatTimestamp(currentUser.lastLoginAt)}</strong>
+              </article>
             </div>
+
+            <article className="profile-panel">
+              <div className="lookup-meta profile-panel__meta">
+                <span>Status: {currentUser.status}</span>
+                {currentUser.approvedAt ? (
+                  <span>Approved {formatTimestamp(currentUser.approvedAt)}</span>
+                ) : null}
+                {currentUser.approvedBy ? (
+                  <span>Approved by {currentUser.approvedBy}</span>
+                ) : null}
+              </div>
+
+              <div className="permission-block">
+                <h3>Permissions</h3>
+                <div className="permission-grid">
+                  {currentUser.permissions.map((permission) => (
+                    <span key={permission} className="permission-chip">
+                      {formatPermissionLabel(permission)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </article>
           </section>
-        ) : null}
 
-        {capabilities.canManageUsers ? (
-          <section className="admin-shell admin-section">
+          <section className="admin-shell admin-section compact-section">
             <div className="section-head">
-              <h2>Access requests</h2>
-              <p>Approve or reject pending admin registrations</p>
+              <h2>Next actions</h2>
             </div>
 
-            {userActionState.error ? (
-              <p className="error-copy">{userActionState.error}</p>
-            ) : null}
-
-            <div className="member-grid">
-              {data.pendingUsers.length > 0 ? (
-                data.pendingUsers.map((user) => (
-                  <UserCard
-                    key={user.id}
-                    user={user}
-                    pending
-                    isCurrentUser={false}
-                    availableRoles={data.availableRoles}
-                    roleValue={pendingRoleDrafts[user.id] || user.role}
-                    onRoleChange={(userId, role) =>
-                      setPendingRoleDrafts((current) => ({
-                        ...current,
-                        [userId]: role
-                      }))
-                    }
-                    onApprove={(userId, role) =>
-                      handleUserAction("approve", userId, role)
-                    }
-                    onReject={(userId) => handleUserAction("reject", userId)}
-                    onSaveRole={() => {}}
-                    actionState={userActionState}
-                  />
-                ))
-              ) : (
-                <p className="empty-copy panel-empty">
-                  No pending requests right now
-                </p>
-              )}
-            </div>
+            <ul className="activity-list">
+              {data.activity.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </section>
-        ) : null}
+        </>
+      );
+    }
 
-        {capabilities.canManageUsers ? (
-          <section className="admin-shell admin-section">
-            <div className="section-head">
-              <h2>Team access</h2>
-              <p>Review active admins and adjust their roles</p>
-            </div>
+    if (activeTabConfig.id === "control-center") {
+      return (
+        <section className="admin-shell admin-section">
+          <div className="section-head">
+            <h2>Control center</h2>
+            <p>Live switches for protected admin features</p>
+          </div>
 
-            <div className="member-grid">
-              {data.activeUsers.map((user) => (
+          <div className="control-grid">
+            <ControlCard
+              title="Game migration"
+              description="Controls the Roblox data migration flow that copies a player's saved data from one Roblox experience into another"
+              enabled={data.migrationControl.enabled}
+              writable={data.migrationControl.writable}
+              status={migrationState.status}
+              note={
+                data.migrationControl.note ||
+                "Pause migration here without removing the backend routes"
+              }
+              error={migrationState.error}
+              onToggle={() => handleMigrationToggle(!data.migrationControl.enabled)}
+            />
+          </div>
+        </section>
+      );
+    }
+
+    if (activeTabConfig.id === "role-permissions") {
+      return (
+        <section className="admin-shell admin-section">
+          <div className="section-head">
+            <h2>Role permissions</h2>
+            <p>Control what each admin role can do inside this panel</p>
+          </div>
+
+          <div className="permission-card-grid">
+            {sortRolePermissionConfigs(data.rolePermissions).map((roleConfig) => (
+              <RolePermissionCard
+                key={roleConfig.role}
+                roleConfig={roleConfig}
+                availablePermissions={data.availablePermissions}
+                draftPermissions={
+                  rolePermissionDrafts[roleConfig.role] || roleConfig.permissions
+                }
+                saveState={rolePermissionState}
+                onTogglePermission={(role, permission, checked) =>
+                  setRolePermissionDrafts((current) => {
+                    const currentPermissions = current[role] || [];
+                    const nextPermissions = checked
+                      ? [...currentPermissions, permission]
+                      : currentPermissions.filter(
+                          (currentPermission) => currentPermission !== permission
+                        );
+
+                    return {
+                      ...current,
+                      [role]: data.availablePermissions
+                        .map((item) => item.value)
+                        .filter((value) => nextPermissions.includes(value))
+                    };
+                  })
+                }
+                onReset={(role, permissions) =>
+                  setRolePermissionDrafts((current) => ({
+                    ...current,
+                    [role]: permissions
+                  }))
+                }
+                onSave={handleRolePermissionSave}
+              />
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    if (activeTabConfig.id === "access-requests") {
+      return (
+        <section className="admin-shell admin-section">
+          <div className="section-head">
+            <h2>Access requests</h2>
+            <p>Approve or reject pending admin registrations</p>
+          </div>
+
+          {userActionState.error ? (
+            <p className="error-copy">{userActionState.error}</p>
+          ) : null}
+
+          <div className="member-grid">
+            {data.pendingUsers.length > 0 ? (
+              data.pendingUsers.map((user) => (
                 <UserCard
                   key={user.id}
                   user={user}
-                  pending={false}
-                  isCurrentUser={user.id === currentUser.id}
+                  pending
+                  isCurrentUser={false}
                   availableRoles={data.availableRoles}
-                  roleValue={activeRoleDrafts[user.id] || user.role}
+                  roleValue={pendingRoleDrafts[user.id] || user.role}
                   onRoleChange={(userId, role) =>
-                    setActiveRoleDrafts((current) => ({
+                    setPendingRoleDrafts((current) => ({
                       ...current,
                       [userId]: role
                     }))
                   }
-                  onApprove={() => {}}
-                  onReject={() => {}}
-                  onSaveRole={(userId, role) =>
-                    handleUserAction("set_role", userId, role)
+                  onApprove={(userId, role) =>
+                    handleUserAction("approve", userId, role)
                   }
+                  onReject={(userId) => handleUserAction("reject", userId)}
+                  onSaveRole={() => {}}
                   actionState={userActionState}
                 />
-              ))}
-            </div>
-          </section>
-        ) : null}
+              ))
+            ) : (
+              <p className="empty-copy panel-empty">
+                No pending requests right now
+              </p>
+            )}
+          </div>
+        </section>
+      );
+    }
 
-        {capabilities.canReadRobloxData ? (
-          <section className="admin-shell admin-section">
-            <div className="section-head">
-              <h2>Roblox player data lookup</h2>
-              <p>Reads one DataStore entry using the player ID as the entry key</p>
-            </div>
-
-            <form className="lookup-form" onSubmit={handlePlayerLookup}>
-              <label className="field-label" htmlFor="player-id">
-                Player ID
-              </label>
-              <div className="lookup-controls">
-                <input
-                  id="player-id"
-                  name="player-id"
-                  type="text"
-                  inputMode="numeric"
-                  className="field-input"
-                  value={playerId}
-                  onChange={(event) => setPlayerId(event.target.value)}
-                  placeholder="89879612"
-                  required
-                />
-                <button
-                  className="submit-button"
-                  type="submit"
-                  disabled={lookupState.status === "loading"}
-                >
-                  {lookupState.status === "loading" ? "Reading" : "Read data"}
-                </button>
-              </div>
-            </form>
-
-            {lookupState.error ? (
-              <p className="error-copy lookup-error">{lookupState.error}</p>
-            ) : null}
-
-            <div className="lookup-result">
-              {lookupState.payload ? (
-                <>
-                  <div className="lookup-meta">
-                    <span>Entry key used: {lookupState.payload.entryKeyUsed}</span>
-                    <span>Scope: {lookupState.payload.datastoreScope}</span>
-                    <span>Store: {lookupState.payload.datastoreName}</span>
-                  </div>
-                  <pre className="result-code">
-                    <code>{JSON.stringify(lookupState.payload.data, null, 2)}</code>
-                  </pre>
-                </>
-              ) : (
-                <p className="empty-copy">
-                  Enter a player ID and read the DataStore entry using that ID as the key
-                </p>
-              )}
-            </div>
-          </section>
-        ) : null}
-
-        <section className="admin-shell admin-section compact-section">
+    if (activeTabConfig.id === "team") {
+      return (
+        <section className="admin-shell admin-section">
           <div className="section-head">
-            <h2>Next actions</h2>
+            <h2>Team access</h2>
+            <p>Review active admins and adjust their roles</p>
           </div>
 
-          <ul className="activity-list">
-            {data.activity.map((item) => (
-              <li key={item}>{item}</li>
+          <div className="member-grid">
+            {data.activeUsers.map((user) => (
+              <UserCard
+                key={user.id}
+                user={user}
+                pending={false}
+                isCurrentUser={user.id === currentUser.id}
+                availableRoles={data.availableRoles}
+                roleValue={activeRoleDrafts[user.id] || user.role}
+                onRoleChange={(userId, role) =>
+                  setActiveRoleDrafts((current) => ({
+                    ...current,
+                    [userId]: role
+                  }))
+                }
+                onApprove={() => {}}
+                onReject={() => {}}
+                onSaveRole={(userId, role) =>
+                  handleUserAction("set_role", userId, role)
+                }
+                actionState={userActionState}
+              />
             ))}
-          </ul>
+          </div>
         </section>
+      );
+    }
+
+    if (activeTabConfig.id === "logs") {
+      return (
+        <section className="admin-shell admin-section">
+          <div className="section-head">
+            <h2>Activity log</h2>
+            <p>Recent approvals, rejections and role changes</p>
+          </div>
+
+          <div className="audit-grid">
+            {data.auditEvents.length > 0 ? (
+              data.auditEvents.map((event) => (
+                <AuditEventCard key={event.id} event={event} />
+              ))
+            ) : (
+              <p className="empty-copy panel-empty">
+                No admin actions have been logged yet
+              </p>
+            )}
+          </div>
+        </section>
+      );
+    }
+
+    if (activeTabConfig.id === "roblox-lookup") {
+      return (
+        <section className="admin-shell admin-section">
+          <div className="section-head">
+            <h2>Roblox player data lookup</h2>
+            <p>Read one DataStore entry using the player ID as the entry key</p>
+          </div>
+
+          <form className="lookup-form" onSubmit={handlePlayerLookup}>
+            <label className="field-label" htmlFor="player-id">
+              Player ID
+            </label>
+            <div className="lookup-controls">
+              <input
+                id="player-id"
+                name="player-id"
+                type="text"
+                inputMode="numeric"
+                className="field-input"
+                value={playerId}
+                onChange={(event) => setPlayerId(event.target.value)}
+                placeholder="89879612"
+                required
+              />
+              <button
+                className="submit-button"
+                type="submit"
+                disabled={lookupState.status === "loading"}
+              >
+                {lookupState.status === "loading" ? "Reading" : "Read data"}
+              </button>
+            </div>
+          </form>
+
+          {lookupState.error ? (
+            <p className="error-copy lookup-error">{lookupState.error}</p>
+          ) : null}
+
+          <div className="lookup-result">
+            {lookupState.payload ? (
+              <>
+                <div className="lookup-meta">
+                  <span>Entry key used: {lookupState.payload.entryKeyUsed}</span>
+                  <span>Scope: {lookupState.payload.datastoreScope}</span>
+                  <span>Store: {lookupState.payload.datastoreName}</span>
+                </div>
+                <pre className="result-code">
+                  <code>{JSON.stringify(lookupState.payload.data, null, 2)}</code>
+                </pre>
+              </>
+            ) : (
+              <p className="empty-copy">
+                Enter a player ID and read the DataStore entry using that ID as the key
+              </p>
+            )}
+          </div>
+        </section>
+      );
+    }
+
+    return null;
+  }
+
+  return (
+    <div className="admin-page">
+      <div className="admin-layout">
+        <aside className="admin-shell admin-sidebar">
+          <div className="sidebar-brand">
+            <span className="sidebar-brand__mark">LK</span>
+            <div className="sidebar-brand__copy">
+              <strong>Lockou Admin</strong>
+              <span>Restricted workspace</span>
+            </div>
+          </div>
+
+          <div className="sidebar-profile">
+            <div className="sidebar-avatar">{getUserInitials(currentUser.username)}</div>
+            <div className="sidebar-profile__copy">
+              <strong>{currentUser.username}</strong>
+              <span>{currentUser.roleLabel}</span>
+              <div className="sidebar-profile__meta">
+                <span>{currentUser.permissions.length} permissions</span>
+                <span>{currentUser.status}</span>
+              </div>
+            </div>
+          </div>
+
+          <nav className="sidebar-nav" aria-label="Admin sections">
+            {availableTabs.map((tab) => (
+              <SidebarNavItem
+                key={tab.id}
+                tab={tab}
+                active={tab.id === activeTabConfig?.id}
+                onSelect={setActiveTab}
+              />
+            ))}
+          </nav>
+
+          <div className="sidebar-footer">
+            <button
+              className="logout-button sidebar-logout"
+              type="button"
+              onClick={handleLogout}
+              disabled={logoutState === "loading"}
+            >
+              <span className="sidebar-logout__icon" aria-hidden="true">
+                <i className="bi bi-box-arrow-right" />
+              </span>
+              <span>{logoutState === "loading" ? "Leaving" : "Logout"}</span>
+            </button>
+          </div>
+        </aside>
+
+        <main className="admin-main">
+          <section className="admin-shell admin-main-hero">
+            <div>
+              <p className="eyebrow">{activeTabConfig?.label || "Admin"}</p>
+              <h1>{activeTabConfig?.heading || data.heading}</h1>
+              <p className="support-copy">
+                {activeTabConfig?.description || "Protected admin content"}
+              </p>
+            </div>
+
+            <div className="workspace-meta">
+              <p className="status-pill">{currentUser.roleLabel}</p>
+              <p className="workspace-meta__stamp">
+                Updated {formatTimestamp(data.updatedAt)}
+              </p>
+            </div>
+          </section>
+
+          <div className="admin-main-stack">{renderTabContent()}</div>
+        </main>
       </div>
     </div>
   );
