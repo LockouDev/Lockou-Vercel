@@ -1,4 +1,7 @@
-import { completeRobloxOauthCallback } from "../../../lib/admin-roblox-oauth.js";
+import {
+  completeRobloxOauthCallback,
+  markRobloxOauthDenied
+} from "../../../lib/admin-roblox-oauth.js";
 
 export default {
   async fetch(request) {
@@ -9,14 +12,29 @@ export default {
     const redirectUrl = new URL("/admin", request.url);
 
     if (oauthError) {
-      redirectUrl.searchParams.set("oauth_error", oauthError);
+      if (oauthError === "access_denied") {
+        try {
+          const denied = await markRobloxOauthDenied(state);
+          return Response.redirect(
+            new URL(denied.nextPath || "/admin", request.url),
+            302
+          );
+        } catch {
+          return Response.redirect(redirectUrl, 302);
+        }
+      } else {
+        redirectUrl.searchParams.set("oauth_error", oauthError);
+      }
+
       return Response.redirect(redirectUrl, 302);
     }
 
     try {
-      await completeRobloxOauthCallback(code, state);
-      redirectUrl.searchParams.set("oauth_success", "roblox_connected");
-      return Response.redirect(redirectUrl, 302);
+      const result = await completeRobloxOauthCallback(code, state);
+      return Response.redirect(
+        new URL(result.nextPath || "/admin", request.url),
+        302
+      );
     } catch (error) {
       redirectUrl.searchParams.set(
         "oauth_error",

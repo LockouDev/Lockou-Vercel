@@ -238,12 +238,13 @@ function SidebarNavItem({ tab, active, onSelect }) {
 
 function RobloxConnectCard({ currentUser }) {
   const connected = Boolean(currentUser.robloxUserId && currentUser.robloxAvatarUrl);
+  const decided = Boolean(currentUser.robloxOauthStatus);
 
   return (
     <section className="admin-shell admin-section compact-section">
       <div className="section-head">
         <h2>Roblox account</h2>
-        <p>Connect your Roblox profile to show the real avatar icon in the sidebar</p>
+        <p>Roblox avatar sync is requested once during login and stays saved on your account</p>
       </div>
 
       <div className="roblox-connect-card">
@@ -252,12 +253,10 @@ function RobloxConnectCard({ currentUser }) {
           {currentUser.robloxUsername ? (
             <span>Roblox: {currentUser.robloxUsername}</span>
           ) : null}
+          {!connected && decided ? <span>Decision already saved</span> : null}
         </div>
 
         <div className="member-card__actions">
-          <a className="submit-button roblox-connect-button" href="/api/admin/roblox/connect">
-            {connected ? "Reconnect Roblox" : "Connect Roblox"}
-          </a>
           {currentUser.robloxProfileUrl ? (
             <a
               className="secondary-button roblox-connect-button"

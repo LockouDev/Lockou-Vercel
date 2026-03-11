@@ -13,7 +13,9 @@ export default {
     }
 
     try {
-      const state = await createRobloxOauthState(session.user.id);
+      const url = new URL(request.url);
+      const nextPath = String(url.searchParams.get("next") || "/admin");
+      const state = await createRobloxOauthState(session.user.id, nextPath);
       return Response.redirect(buildRobloxAuthorizeUrl(state), 302);
     } catch (error) {
       const url = new URL("/admin", request.url);

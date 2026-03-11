@@ -43,6 +43,12 @@ function AdminLoginApp() {
         throw new Error(payload.error || "Access denied");
       }
 
+      if (payload.needsRobloxConnect) {
+        const oauthNext = encodeURIComponent(nextPath);
+        window.location.replace(`/api/admin/roblox/connect?next=${oauthNext}`);
+        return;
+      }
+
       window.location.replace(nextPath);
     } catch (requestError) {
       setStatus("error");

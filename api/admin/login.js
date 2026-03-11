@@ -78,7 +78,8 @@ export default {
       return createJsonResponse(
         {
           ok: true,
-          user: await buildSafeAdminUser(user)
+          user: await buildSafeAdminUser(user),
+          needsRobloxConnect: !user.robloxOauthStatus
         },
         {
           status: 200,
