@@ -1,5 +1,6 @@
 import { createJsonResponse } from "../../lib/admin-auth.js";
 import {
+  isGameMigrationEnabled,
   readGameMigrationSecret,
   safeCompareSecrets
 } from "../../lib/game-migration-auth.js";
@@ -43,6 +44,15 @@ export default {
         { error: "Method not allowed" },
         { status: 405, headers: { allow: "POST" } }
       );
+    }
+
+    if (!isGameMigrationEnabled()) {
+      return createJsonResponse({
+        ok: true,
+        ignored: true,
+        disabled: true,
+        reason: "migration_disabled"
+      });
     }
 
     const expectedSecret = readGameMigrationSecret();
