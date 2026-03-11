@@ -38,6 +38,9 @@ function ControlCard({
   error,
   onToggle
 }) {
+  const detailText =
+    error || (note === "Live toggle persisted in Redis" ? "" : note);
+
   return (
     <article className="control-card">
       <div className="control-card__header">
@@ -67,9 +70,9 @@ function ControlCard({
         <span>Mode: {writable ? "Live writable" : "Read only"}</span>
       </div>
 
-      <p className="support-copy control-card__copy">
-        {error || note || "No details available for this control"}
-      </p>
+      {detailText ? (
+        <p className="support-copy control-card__copy">{detailText}</p>
+      ) : null}
     </article>
   );
 }
