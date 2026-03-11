@@ -138,8 +138,7 @@ body {
 
 .logout-button,
 .submit-button,
-.ghost-link,
-.ghost-button {
+.ghost-link {
   appearance: none;
   border: 0;
   border-radius: 12px;
@@ -173,20 +172,9 @@ body {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.ghost-button {
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--admin-line);
-  color: var(--admin-text);
-  background: rgba(255, 255, 255, 0.03);
-}
-
 .logout-button:hover,
 .submit-button:hover,
-.ghost-link:hover,
-.ghost-button:hover {
+.ghost-link:hover {
   transform: translateY(-1px);
 }
 
@@ -287,20 +275,6 @@ body {
   margin-top: 14px;
 }
 
-.control-card__footer {
-  margin-top: 18px;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-}
-
-.control-card__status {
-  color: #d6e7ff;
-  font-weight: 700;
-  font-size: 0.92rem;
-}
-
 .control-switch {
   cursor: pointer;
   appearance: none;
@@ -316,7 +290,7 @@ body {
 }
 
 .control-switch:disabled,
-.ghost-button:disabled {
+.submit-button:disabled {
   cursor: not-allowed;
   opacity: 0.58;
 }
@@ -792,14 +766,9 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .control-card__header,
-  .control-card__footer {
+  .control-card__header {
     grid-template-columns: 1fr;
     display: grid;
-  }
-
-  .control-card__footer .ghost-button {
-    width: 100%;
   }
 }
 

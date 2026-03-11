@@ -41,7 +41,7 @@ export default {
 
     if (!expectedSecret) {
       return createJsonResponse(
-        { error: "GAME_MIGRATION_SECRET is not configured." },
+        { error: "GAME_MIGRATION_SECRET is not configured" },
         { status: 500 }
       );
     }
@@ -62,7 +62,7 @@ export default {
 
     if (!playerId) {
       return createJsonResponse(
-        { error: "playerId is required." },
+        { error: "playerId is required" },
         { status: 400 }
       );
     }
@@ -84,7 +84,7 @@ export default {
           error:
             result.kind === "config"
               ? result.error
-              : "Failed to read Roblox source data.",
+              : "Failed to read Roblox source data",
           playerId,
           robloxStatus: result.robloxStatus,
           robloxPayload: result.robloxPayload

@@ -52,7 +52,7 @@ export default {
 
     if (typeof payload?.enabled !== "boolean") {
       return createJsonResponse(
-        { error: "enabled must be a boolean." },
+        { error: "enabled must be a boolean" },
         { status: 400 }
       );
     }
@@ -69,7 +69,7 @@ export default {
         {
           error:
             error.message ||
-            "Failed to update the migration control setting."
+            "Failed to update the migration control setting"
         },
         { status: 409 }
       );

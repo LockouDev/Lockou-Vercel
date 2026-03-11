@@ -17,7 +17,7 @@ export default {
 
     if (!getAccessCodeState().ready) {
       return createJsonResponse(
-        { error: "Admin access is not configured on the server yet." },
+        { error: "Admin access is not configured on the server yet" },
         { status: 500 }
       );
     }

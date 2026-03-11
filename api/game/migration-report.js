@@ -60,7 +60,7 @@ export default {
 
     if (!expectedSecret) {
       return createJsonResponse(
-        { error: "GAME_MIGRATION_SECRET is not configured." },
+        { error: "GAME_MIGRATION_SECRET is not configured" },
         { status: 500 }
       );
     }
@@ -73,7 +73,7 @@ export default {
 
     if (!discordWebhookUrl) {
       return createJsonResponse(
-        { error: "DISCORD_MIGRATION_WEBHOOK_URL is not configured." },
+        { error: "DISCORD_MIGRATION_WEBHOOK_URL is not configured" },
         { status: 500 }
       );
     }
@@ -88,7 +88,7 @@ export default {
 
     if (!payload?.playerId) {
       return createJsonResponse(
-        { error: "playerId is required." },
+        { error: "playerId is required" },
         { status: 400 }
       );
     }
@@ -106,7 +106,7 @@ export default {
 
       return createJsonResponse(
         {
-          error: "Discord webhook request failed.",
+          error: "Discord webhook request failed",
           discordStatus: discordResponse.status,
           discordPayload: discordText
         },

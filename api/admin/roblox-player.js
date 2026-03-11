@@ -18,7 +18,7 @@ export default {
 
     if (!playerId) {
       return createJsonResponse(
-        { error: "playerId query parameter is required." },
+        { error: "playerId query parameter is required" },
         { status: 400 }
       );
     }
@@ -31,7 +31,7 @@ export default {
           error:
             result.kind === "config"
               ? result.error
-              : "Roblox Open Cloud request failed.",
+              : "Roblox Open Cloud request failed",
           playerId,
           entryKeyUsed: playerId,
           datastoreName: result.datastoreName,

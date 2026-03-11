@@ -34,7 +34,6 @@ function ControlCard({
   enabled,
   writable,
   status,
-  storage,
   note,
   error,
   onToggle
@@ -65,31 +64,12 @@ function ControlCard({
 
       <div className="lookup-meta control-card__meta">
         <span>State: {enabled ? "Enabled" : "Disabled"}</span>
-        <span>Storage: {storage}</span>
         <span>Mode: {writable ? "Live writable" : "Read only"}</span>
       </div>
 
       <p className="support-copy control-card__copy">
-        {error || note || "No details available for this control."}
+        {error || note || "No details available for this control"}
       </p>
-
-      <div className="control-card__footer">
-        <span className="control-card__status">
-          {status === "loading"
-            ? "Saving..."
-            : enabled
-              ? "Currently active"
-              : "Currently paused"}
-        </span>
-        <button
-          className="ghost-button"
-          type="button"
-          onClick={onToggle}
-          disabled={status === "loading" || !writable}
-        >
-          {enabled ? "Disable" : "Enable"}
-        </button>
-      </div>
     </article>
   );
 }
@@ -204,7 +184,7 @@ function AdminApp() {
       const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error(payload.error || "Failed to read player data.");
+        throw new Error(payload.error || "Failed to read player data");
       }
 
       setLookupState({
@@ -216,7 +196,7 @@ function AdminApp() {
       setLookupState({
         status: "error",
         payload: null,
-        error: error.message || "Failed to read player data."
+        error: error.message || "Failed to read player data"
       });
     }
   }
@@ -242,7 +222,7 @@ function AdminApp() {
       const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error(payload.error || "Failed to update migration state.");
+        throw new Error(payload.error || "Failed to update migration state");
       }
 
       setMigrationControl({
@@ -286,7 +266,7 @@ function AdminApp() {
       setMigrationControl((current) => ({
         ...current,
         status: "error",
-        error: error.message || "Failed to update migration state."
+        error: error.message || "Failed to update migration state"
       }));
     }
   }
@@ -299,9 +279,9 @@ function AdminApp() {
             <AdminLoader />
             <div className="loading-copy">
               <p className="eyebrow">Lockou Admin</p>
-              <h1>Loading restricted workspace...</h1>
+              <h1>Loading restricted workspace</h1>
               <p className="support-copy">
-                Preparing protected controls, Roblox tools and private admin data.
+                Preparing protected controls, Roblox tools and private admin data
               </p>
             </div>
           </div>
@@ -335,7 +315,7 @@ function AdminApp() {
             <p className="eyebrow">Restricted control room</p>
             <h1>{data.heading}</h1>
             <p className="support-copy">
-              Base ready for Roblox data APIs, private datasets and internal actions.
+              Base ready for Roblox data APIs, private datasets and internal actions
             </p>
           </div>
 
@@ -347,7 +327,7 @@ function AdminApp() {
               onClick={handleLogout}
               disabled={logoutState === "loading"}
             >
-              {logoutState === "loading" ? "Leaving..." : "Logout"}
+              {logoutState === "loading" ? "Leaving" : "Logout"}
             </button>
           </div>
         </header>
@@ -371,20 +351,19 @@ function AdminApp() {
         <section className="admin-shell admin-section">
           <div className="section-head">
             <h2>Control center</h2>
-            <p>Central place for live switches that affect private admin features.</p>
+            <p>Central place for live switches that affect private admin features</p>
           </div>
 
           <div className="control-grid">
             <ControlCard
               title="Game migration"
-              description="Controls whether the migration endpoints answer incoming game requests."
+              description="Controls the Roblox data migration flow that copies a player's saved data from one experience into another"
               enabled={migrationControl.enabled}
               writable={migrationControl.writable}
               status={migrationControl.status}
-              storage={migrationControl.storage}
               note={
                 migrationControl.note ||
-                "Pause migration here without removing the backend routes."
+                "Pause migration here without removing the backend routes"
               }
               error={migrationControl.error}
               onToggle={() => handleMigrationToggle(!migrationControl.enabled)}
@@ -395,7 +374,7 @@ function AdminApp() {
         <section className="admin-shell admin-section">
           <div className="section-head">
             <h2>Data slots</h2>
-            <p>Placeholders for the Roblox sources you will map next.</p>
+            <p>Placeholders for the Roblox sources you will map next</p>
           </div>
 
           <div className="dataset-table">
@@ -414,7 +393,7 @@ function AdminApp() {
         <section className="admin-shell admin-section">
           <div className="section-head">
             <h2>Roblox player data lookup</h2>
-            <p>Reads one DataStore entry using the player ID as the entry key.</p>
+            <p>Reads one DataStore entry using the player ID as the entry key</p>
           </div>
 
           <form className="lookup-form" onSubmit={handlePlayerLookup}>
@@ -438,7 +417,7 @@ function AdminApp() {
                 type="submit"
                 disabled={lookupState.status === "loading"}
               >
-                {lookupState.status === "loading" ? "Reading..." : "Read data"}
+                {lookupState.status === "loading" ? "Reading" : "Read data"}
               </button>
             </div>
           </form>
@@ -461,7 +440,7 @@ function AdminApp() {
               </>
             ) : (
               <p className="empty-copy">
-                Enter a player ID and read the DataStore entry using that ID as the key.
+                Enter a player ID and read the DataStore entry using that ID as the key
               </p>
             )}
           </div>

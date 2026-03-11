@@ -41,7 +41,7 @@ function AdminLoginApp() {
         <p className="eyebrow">Lockou Admin</p>
         <h1>Restricted access</h1>
         <p className="support-copy">
-          Enter the private access code to open the admin workspace.
+          Enter the private access code to open the admin workspace
         </p>
 
         <form className="login-form" onSubmit={handleSubmit}>
@@ -68,7 +68,7 @@ function AdminLoginApp() {
               type="submit"
               disabled={status === "loading"}
             >
-              {status === "loading" ? "Checking..." : "Enter admin"}
+              {status === "loading" ? "Checking" : "Enter admin"}
             </button>
 
             <a className="ghost-link" href="/">
