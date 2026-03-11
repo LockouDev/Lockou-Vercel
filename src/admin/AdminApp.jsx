@@ -6,6 +6,12 @@ const PERMISSION_LABELS = {
   "roblox.data.read": "Read Roblox DataStore data"
 };
 
+const ROLE_PRIORITY = {
+  supreme: 0,
+  moderator: 1,
+  reader: 2
+};
+
 function formatTimestamp(value) {
   if (!value) {
     return "Unknown";
@@ -41,6 +47,31 @@ function arePermissionListsEqual(left, right) {
   }
 
   return left.every((permission, index) => permission === right[index]);
+}
+
+function sortRolePermissionConfigs(rolePermissions) {
+  return [...(rolePermissions || [])].sort((left, right) => {
+    const leftPriority = ROLE_PRIORITY[left.role] ?? 999;
+    const rightPriority = ROLE_PRIORITY[right.role] ?? 999;
+
+    if (leftPriority !== rightPriority) {
+      return leftPriority - rightPriority;
+    }
+
+    return left.label.localeCompare(right.label);
+  });
+}
+
+function getRoleAccessSummary(role) {
+  if (role === "supreme") {
+    return "Highest access";
+  }
+
+  if (role === "moderator") {
+    return "Operational access";
+  }
+
+  return "Read focused access";
 }
 
 function formatPermissionLabel(permission) {
@@ -283,11 +314,14 @@ function RolePermissionCard({
     selectedPermissions,
     roleConfig.permissions || []
   );
+  const permissionCount = selectedPermissions.length;
+  const accessSummary = getRoleAccessSummary(roleConfig.role);
 
   return (
-    <article className="permission-card">
+    <article className={`permission-card permission-card--${roleConfig.role}`}>
       <div className="permission-card__header">
         <div>
+          <p className="permission-card__eyebrow">{accessSummary}</p>
           <h3>{roleConfig.label}</h3>
           <p>{roleConfig.note || "Customize what this role can access"}</p>
         </div>
@@ -296,69 +330,74 @@ function RolePermissionCard({
         </span>
       </div>
 
-      <div className="lookup-meta permission-card__meta">
-        <span>
-          State: {roleConfig.usesDefault ? "Using defaults" : "Custom permissions"}
-        </span>
-        {roleConfig.updatedBy ? <span>Updated by {roleConfig.updatedBy}</span> : null}
-        {roleConfig.updatedAt ? (
-          <span>Updated {formatTimestamp(roleConfig.updatedAt)}</span>
-        ) : null}
-      </div>
+      <div className="permission-card__layout">
+        <div className="permission-card__sidebar">
+          <div className="lookup-meta permission-card__meta">
+            <span>
+              State: {roleConfig.usesDefault ? "Using defaults" : "Custom permissions"}
+            </span>
+            <span>{permissionCount} permissions selected</span>
+            {roleConfig.updatedBy ? <span>Updated by {roleConfig.updatedBy}</span> : null}
+            {roleConfig.updatedAt ? (
+              <span>Updated {formatTimestamp(roleConfig.updatedAt)}</span>
+            ) : null}
+          </div>
 
-      <div className="permission-options">
-        {availablePermissions.map((permission) => {
-          const checked = selectedPermissions.includes(permission.value);
+          {roleConfig.editable ? (
+            <div className="member-card__actions permission-card__actions">
+              <button
+                className="secondary-button"
+                type="button"
+                disabled={busy || !changed}
+                onClick={() => onReset(roleConfig.role, roleConfig.permissions || [])}
+              >
+                {busy ? "Saving" : "Reset"}
+              </button>
+              <button
+                className="submit-button"
+                type="button"
+                disabled={busy || !changed}
+                onClick={() => onSave(roleConfig.role)}
+              >
+                {busy ? "Saving" : "Save permissions"}
+              </button>
+            </div>
+          ) : null}
+        </div>
 
-          return (
-            <label
-              key={`${roleConfig.role}-${permission.value}`}
-              className={`permission-option${checked ? " is-active" : ""}${roleConfig.editable ? "" : " is-locked"}`}
-            >
-              <input
-                type="checkbox"
-                checked={checked}
-                disabled={!roleConfig.editable || busy}
-                onChange={(event) =>
-                  onTogglePermission(
-                    roleConfig.role,
-                    permission.value,
-                    event.target.checked
-                  )
-                }
-              />
-              <div className="permission-option__copy">
-                <strong>{permission.label}</strong>
-                <span>{permission.description}</span>
-              </div>
-            </label>
-          );
-        })}
+        <div className="permission-options">
+          {availablePermissions.map((permission) => {
+            const checked = selectedPermissions.includes(permission.value);
+
+            return (
+              <label
+                key={`${roleConfig.role}-${permission.value}`}
+                className={`permission-option${checked ? " is-active" : ""}${roleConfig.editable ? "" : " is-locked"}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  disabled={!roleConfig.editable || busy}
+                  onChange={(event) =>
+                    onTogglePermission(
+                      roleConfig.role,
+                      permission.value,
+                      event.target.checked
+                    )
+                  }
+                />
+                <div className="permission-option__copy">
+                  <strong>{permission.label}</strong>
+                  <span>{permission.description}</span>
+                </div>
+              </label>
+            );
+          })}
+        </div>
       </div>
 
       {saveState.error && saveState.role === roleConfig.role ? (
         <p className="error-copy">{saveState.error}</p>
-      ) : null}
-
-      {roleConfig.editable ? (
-        <div className="member-card__actions permission-card__actions">
-          <button
-            className="secondary-button"
-            type="button"
-            disabled={busy || !changed}
-            onClick={() => onReset(roleConfig.role, roleConfig.permissions || [])}
-          >
-            {busy ? "Saving" : "Reset"}
-          </button>
-          <button
-            className="submit-button"
-            type="button"
-            disabled={busy || !changed}
-            onClick={() => onSave(roleConfig.role)}
-          >
-            {busy ? "Saving" : "Save permissions"}
-          </button>
-        </div>
       ) : null}
     </article>
   );
@@ -755,11 +794,11 @@ function AdminApp() {
           <section className="admin-shell admin-section">
             <div className="section-head">
               <h2>Role permissions</h2>
-              <p>Control what each admin role can do inside this panel</p>
+              <p>Control what each admin role can do inside this panel with stronger roles first</p>
             </div>
 
             <div className="permission-card-grid">
-              {data.rolePermissions.map((roleConfig) => (
+              {sortRolePermissionConfigs(data.rolePermissions).map((roleConfig) => (
                 <RolePermissionCard
                   key={roleConfig.role}
                   roleConfig={roleConfig}
