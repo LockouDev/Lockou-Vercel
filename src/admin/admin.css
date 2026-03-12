@@ -1705,19 +1705,20 @@ body {
 }
 
 .compact-section .roblox-connect-card {
-  justify-items: center;
+  justify-items: stretch;
 }
 
 .compact-section .roblox-connect-card .lookup-meta {
   width: 100%;
+  margin-top: 10px;
   margin-bottom: 0;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 
 .compact-section .roblox-connect-card .member-card__actions {
   width: 100%;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .roblox-connect-button {
