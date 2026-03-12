@@ -2,9 +2,14 @@ import {
   completeRobloxOauthCallback,
   markRobloxOauthDenied
 } from "../../../lib/admin-roblox-oauth.js";
+import { isRobloxOauthEnabled } from "../../../lib/admin-roblox-config.js";
 
 export default {
   async fetch(request) {
+    if (!isRobloxOauthEnabled()) {
+      return Response.redirect(new URL("/admin", request.url), 302);
+    }
+
     const url = new URL(request.url);
     const code = String(url.searchParams.get("code") || "").trim();
     const state = String(url.searchParams.get("state") || "").trim();

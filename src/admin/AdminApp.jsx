@@ -236,7 +236,7 @@ function SidebarNavItem({ tab, active, onSelect }) {
   );
 }
 
-function RobloxConnectCard({ currentUser }) {
+function RobloxConnectCard({ currentUser, robloxOauthEnabled }) {
   const connected = Boolean(currentUser.robloxUserId && currentUser.robloxAvatarUrl);
   const decided = Boolean(currentUser.robloxOauthStatus);
 
@@ -244,16 +244,31 @@ function RobloxConnectCard({ currentUser }) {
     <section className="admin-shell admin-section compact-section">
       <div className="section-head">
         <h2>Roblox account</h2>
-        <p>Roblox avatar sync is requested once during login and stays saved on your account</p>
+        <p>
+          {robloxOauthEnabled
+            ? "Roblox avatar sync is requested once during login and stays saved on your account"
+            : "Roblox avatar sync is currently disabled and can be reactivated later with an environment variable"}
+        </p>
       </div>
 
       <div className="roblox-connect-card">
         <div className="lookup-meta">
-          <span>{connected ? "Connected" : "Not connected"}</span>
+          <span>
+            {robloxOauthEnabled
+              ? connected
+                ? "Connected"
+                : "Not connected"
+              : "Disabled"}
+          </span>
           {currentUser.robloxUsername ? (
             <span>Roblox: {currentUser.robloxUsername}</span>
           ) : null}
-          {!connected && decided ? <span>Decision already saved</span> : null}
+          {!connected && decided && robloxOauthEnabled ? (
+            <span>Decision already saved</span>
+          ) : null}
+          {!robloxOauthEnabled ? (
+            <span>Set ROBLOX_OAUTH_ENABLED=true when you want to use it again</span>
+          ) : null}
         </div>
 
         <div className="member-card__actions">
@@ -924,7 +939,10 @@ function AdminApp() {
             </ul>
           </section>
 
-          <RobloxConnectCard currentUser={currentUser} />
+          <RobloxConnectCard
+            currentUser={currentUser}
+            robloxOauthEnabled={data.robloxOauthEnabled}
+          />
         </>
       );
     }

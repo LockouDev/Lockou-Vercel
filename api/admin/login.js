@@ -10,6 +10,7 @@ import {
   readAdminUserByUsername,
   verifyAdminPassword
 } from "../../lib/admin-users.js";
+import { isRobloxOauthEnabled } from "../../lib/admin-roblox-config.js";
 
 export default {
   async fetch(request) {
@@ -79,7 +80,7 @@ export default {
         {
           ok: true,
           user: await buildSafeAdminUser(user),
-          needsRobloxConnect: !user.robloxOauthStatus
+          needsRobloxConnect: isRobloxOauthEnabled() && !user.robloxOauthStatus
         },
         {
           status: 200,

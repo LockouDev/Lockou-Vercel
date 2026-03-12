@@ -10,7 +10,11 @@ export const config = {
 export default async function middleware(request) {
   const { pathname } = new URL(request.url);
 
-  if (pathname === "/api/admin/login" || pathname === "/api/admin/register") {
+  if (
+    pathname === "/api/admin/login" ||
+    pathname === "/api/admin/register" ||
+    pathname === "/api/admin/roblox/callback"
+  ) {
     return;
   }
 

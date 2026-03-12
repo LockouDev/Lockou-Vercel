@@ -13,6 +13,7 @@ import {
   listActiveAdminUsers,
   listPendingAdminUsers
 } from "../../lib/admin-users.js";
+import { isRobloxOauthEnabled } from "../../lib/admin-roblox-config.js";
 
 function buildActivityList(capabilities) {
   const activity = [];
@@ -71,6 +72,7 @@ export default {
       environment: session.safeUser.roleLabel,
       updatedAt: new Date().toISOString(),
       currentUser: session.safeUser,
+      robloxOauthEnabled: isRobloxOauthEnabled(),
       capabilities: session.capabilities,
       availableRoles: getAvailableAdminRoles(session.user),
       overviewCards: [

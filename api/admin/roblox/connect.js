@@ -1,4 +1,5 @@
 import { requireAdminSession } from "../../../lib/admin-auth.js";
+import { isRobloxOauthEnabled } from "../../../lib/admin-roblox-config.js";
 import {
   buildRobloxAuthorizeUrl,
   createRobloxOauthState
@@ -10,6 +11,10 @@ export default {
 
     if (response) {
       return response;
+    }
+
+    if (!isRobloxOauthEnabled()) {
+      return Response.redirect(new URL("/admin", request.url), 302);
     }
 
     try {
