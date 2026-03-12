@@ -1044,7 +1044,7 @@ function AdminApp() {
     });
 
     try {
-      const response = await fetch("/api/admin/preferences", {
+      const response = await fetch("/api/admin/overview", {
         method: "POST",
         credentials: "include",
         headers: {

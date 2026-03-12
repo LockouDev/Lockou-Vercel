@@ -6,7 +6,8 @@ import { listAdminAuditEvents } from "../../lib/admin-audit.js";
 import {
   listAdminLanguages,
   listAdminThemes,
-  readAdminPreferences
+  readAdminPreferences,
+  saveAdminPreferences
 } from "../../lib/admin-preferences.js";
 import {
   listAdminPermissions,
@@ -50,6 +51,35 @@ export default {
 
     if (response) {
       return response;
+    }
+
+    if (request.method === "POST") {
+      let payload;
+
+      try {
+        payload = await request.json();
+      } catch {
+        return createJsonResponse({ error: "Invalid JSON body" }, { status: 400 });
+      }
+
+      const preferences = await saveAdminPreferences(session.user.id, {
+        theme: String(payload?.theme || "").trim(),
+        language: String(payload?.language || "").trim()
+      });
+
+      return createJsonResponse({
+        ok: true,
+        preferences,
+        availableThemes: listAdminThemes(),
+        availableLanguages: listAdminLanguages()
+      });
+    }
+
+    if (request.method !== "GET") {
+      return createJsonResponse(
+        { error: "Method not allowed" },
+        { status: 405, headers: { allow: "GET, POST" } }
+      );
     }
 
     const migrationControl = session.capabilities.canControlMigration
