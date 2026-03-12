@@ -828,6 +828,10 @@ body {
   font-size: 0.92rem;
 }
 
+.support-note--placeholder {
+  visibility: hidden;
+}
+
 .loading-shell {
   text-align: center;
 }

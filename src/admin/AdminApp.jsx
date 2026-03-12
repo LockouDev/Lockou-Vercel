@@ -1082,7 +1082,11 @@ function UserCard({
 
       {isCurrentUser ? (
         <p className="support-note">{copy.rolePermissions.selfRoleLocked}</p>
-      ) : null}
+      ) : (
+        <p className="support-note support-note--placeholder" aria-hidden="true">
+          &nbsp;
+        </p>
+      )}
 
       <div className="member-card__actions">
         {pending ? (
