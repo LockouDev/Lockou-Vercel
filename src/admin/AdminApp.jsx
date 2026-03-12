@@ -18,7 +18,9 @@ const LANGUAGE_COPY = {
       brandSubtitle: "Restricted workspace",
       logout: "Logout",
       leaving: "Leaving",
-      protectedContent: "Protected admin content"
+      protectedContent: "Protected admin content",
+      permissionsCount: "permissions",
+      activeStatus: "active"
     },
     tabs: {
       overview: {
@@ -83,7 +85,9 @@ const LANGUAGE_COPY = {
       brandSubtitle: "Workspace restrito",
       logout: "Sair",
       leaving: "Saindo",
-      protectedContent: "Conteúdo administrativo protegido"
+      protectedContent: "Conteúdo administrativo protegido",
+      permissionsCount: "permissões",
+      activeStatus: "ativo"
     },
     tabs: {
       overview: {
@@ -148,7 +152,9 @@ const LANGUAGE_COPY = {
       brandSubtitle: "Espacio restringido",
       logout: "Salir",
       leaving: "Saliendo",
-      protectedContent: "Contenido administrativo protegido"
+      protectedContent: "Contenido administrativo protegido",
+      permissionsCount: "permisos",
+      activeStatus: "activo"
     },
     tabs: {
       overview: {
@@ -1658,8 +1664,14 @@ function AdminApp() {
                   : currentUser.roleLabel}
               </span>
               <div className="sidebar-profile__meta">
-                <span>{currentUser.permissions.length} permissions</span>
-                <span>{currentUser.status}</span>
+                <span>
+                  {currentUser.permissions.length} {copy.shell.permissionsCount}
+                </span>
+                <span>
+                  {currentUser.status === "active"
+                    ? copy.shell.activeStatus
+                    : currentUser.status}
+                </span>
               </div>
             </div>
           </div>
