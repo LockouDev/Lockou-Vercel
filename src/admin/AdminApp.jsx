@@ -1,9 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const PERMISSION_LABELS = {
-  "admin.users.manage": "Manage admin accounts",
-  "migration.control.write": "Control Roblox migration",
-  "roblox.data.read": "Read Roblox DataStore data"
+  "admin.users.manage": {
+    en: "Manage admin accounts",
+    "pt-BR": "Gerenciar contas admin",
+    es: "Gestionar cuentas admin"
+  },
+  "migration.control.write": {
+    en: "Control Roblox migration",
+    "pt-BR": "Controlar migração do Roblox",
+    es: "Controlar migración de Roblox"
+  },
+  "roblox.data.read": {
+    en: "Read Roblox DataStore data",
+    "pt-BR": "Ler dados do DataStore Roblox",
+    es: "Leer datos del DataStore de Roblox"
+  }
 };
 
 const ROLE_PRIORITY = {
@@ -21,6 +33,30 @@ const LANGUAGE_COPY = {
       protectedContent: "Protected admin content",
       permissionsCount: "permissions",
       activeStatus: "active"
+    },
+    states: {
+      updated: "Updated",
+      approved: "Approved",
+      approvedBy: "Approved by",
+      status: "Status",
+      role: "Role",
+      pending: "Pending",
+      requested: "Requested",
+      reading: "Reading",
+      readData: "Read data",
+      connected: "Connected",
+      notConnected: "Not connected",
+      disabled: "Disabled",
+      decisionSaved: "Decision already saved",
+      save: "Save",
+      saving: "Saving",
+      reset: "Reset",
+      editable: "Editable",
+      locked: "Locked",
+      enabled: "Enabled",
+      saveRole: "Save role",
+      approve: "Approve",
+      reject: "Reject"
     },
     tabs: {
       overview: {
@@ -78,6 +114,86 @@ const LANGUAGE_COPY = {
       sectionOneBody: "Theme and language are saved per admin account so each person can use the panel in their preferred style",
       sectionTwoTitle: "Available languages",
       sectionTwoBody: "English, Portuguese - Brazil and Spanish are ready in this first pass"
+    },
+    overview: {
+      snapshotTitle: "Access snapshot",
+      myProfileTitle: "My profile",
+      myProfileSubtitle: "Session details and current access level",
+      username: "Username",
+      accessLevel: "Access level",
+      memberSince: "Member since",
+      lastLogin: "Last login",
+      permissions: "Permissions",
+      nextActions: "Next actions"
+    },
+    controlCenter: {
+      title: "Control center",
+      subtitle: "Live switches for protected admin features",
+      migrationTitle: "Game migration",
+      migrationDescription:
+        "Controls the Roblox data migration flow that copies a player's saved data from one Roblox experience into another",
+      migrationFallback: "Pause migration here without removing the backend routes",
+      stateLabel: "State",
+      modeLabel: "Mode",
+      liveWritable: "Live writable",
+      readOnly: "Read only"
+    },
+    rolePermissions: {
+      title: "Role permissions",
+      subtitle: "Control what each admin role can do inside this panel",
+      customizeRole: "Customize what this role can access",
+      usingDefaults: "Using defaults",
+      customPermissions: "Custom permissions",
+      permissionsSelected: "permissions selected",
+      updatedBy: "Updated by",
+      savePermissions: "Save permissions",
+      selfRoleLocked: "Your own role stays locked inside this panel",
+      highestAccess: "Highest access",
+      operationalAccess: "Operational access",
+      standardAccess: "Standard access"
+    },
+    accessRequests: {
+      title: "Access requests",
+      subtitle: "Approve or reject pending admin registrations",
+      empty: "No pending requests right now"
+    },
+    team: {
+      title: "Team access",
+      subtitle: "Review active admins and adjust their roles"
+    },
+    logs: {
+      title: "Activity log",
+      subtitle: "Recent approvals, rejections and role changes",
+      empty: "No admin actions have been logged yet",
+      actor: "Actor",
+      target: "Target",
+      approvedAction: "approved",
+      rejectedAction: "rejected",
+      updatedAction: "updated",
+      changedAction: "changed",
+      roleSetTo: "Role set to",
+      requestRejected: "Access request moved to rejected",
+      roleChangedFrom: "Role changed from",
+      to: "to",
+      permissionsTemplateChanged: "Role permissions template changed",
+      adminStateUpdated: "Admin state updated"
+    },
+    robloxLookup: {
+      title: "Roblox player data lookup",
+      subtitle: "Read one DataStore entry using the player ID as the entry key",
+      playerId: "Player ID",
+      entryKeyUsed: "Entry key used",
+      scope: "Scope",
+      store: "Store",
+      empty: "Enter a player ID and read the DataStore entry using that ID as the key"
+    },
+    robloxAccount: {
+      title: "Roblox account",
+      enabledText: "Roblox avatar sync is requested once during login and stays saved on your account",
+      disabledText: "Roblox avatar sync is currently disabled and can be reactivated later with an environment variable",
+      robloxLabel: "Roblox",
+      enableHint: "Set ROBLOX_OAUTH_ENABLED=true when you want to use it again",
+      openProfile: "Open profile"
     }
   },
   "pt-BR": {
@@ -88,6 +204,30 @@ const LANGUAGE_COPY = {
       protectedContent: "Conteúdo administrativo protegido",
       permissionsCount: "permissões",
       activeStatus: "ativo"
+    },
+    states: {
+      updated: "Atualizado",
+      approved: "Aprovado",
+      approvedBy: "Aprovado por",
+      status: "Status",
+      role: "Cargo",
+      pending: "Pendente",
+      requested: "Solicitado",
+      reading: "Lendo",
+      readData: "Ler dados",
+      connected: "Conectado",
+      notConnected: "Não conectado",
+      disabled: "Desativado",
+      decisionSaved: "Decisão já salva",
+      save: "Salvar",
+      saving: "Salvando",
+      reset: "Redefinir",
+      editable: "Editável",
+      locked: "Bloqueado",
+      enabled: "Ativado",
+      saveRole: "Salvar cargo",
+      approve: "Aprovar",
+      reject: "Rejeitar"
     },
     tabs: {
       overview: {
@@ -145,6 +285,86 @@ const LANGUAGE_COPY = {
       sectionOneBody: "Tema e idioma ficam salvos por conta admin para cada pessoa usar o painel do jeito que preferir",
       sectionTwoTitle: "Idiomas disponíveis",
       sectionTwoBody: "Inglês, Português - Brasil e Espanhol já estão prontos nesta primeira versão"
+    },
+    overview: {
+      snapshotTitle: "Resumo de acesso",
+      myProfileTitle: "Meu perfil",
+      myProfileSubtitle: "Detalhes da sessão e nível atual de acesso",
+      username: "Usuário",
+      accessLevel: "Nível de acesso",
+      memberSince: "Membro desde",
+      lastLogin: "Último login",
+      permissions: "Permissões",
+      nextActions: "Próximas ações"
+    },
+    controlCenter: {
+      title: "Central de controle",
+      subtitle: "Interruptores ao vivo para recursos protegidos do painel",
+      migrationTitle: "Migração de dados",
+      migrationDescription:
+        "Controla o fluxo de migração de dados do Roblox que copia os dados salvos de um jogador de uma experiência para outra",
+      migrationFallback: "Pause a migração aqui sem remover as rotas do backend",
+      stateLabel: "Estado",
+      modeLabel: "Modo",
+      liveWritable: "Escrita ao vivo",
+      readOnly: "Somente leitura"
+    },
+    rolePermissions: {
+      title: "Permissões de cargo",
+      subtitle: "Controle o que cada cargo de admin pode fazer neste painel",
+      customizeRole: "Personalize o que este cargo pode acessar",
+      usingDefaults: "Usando padrões",
+      customPermissions: "Permissões personalizadas",
+      permissionsSelected: "permissões selecionadas",
+      updatedBy: "Atualizado por",
+      savePermissions: "Salvar permissões",
+      selfRoleLocked: "Seu próprio cargo permanece bloqueado dentro deste painel",
+      highestAccess: "Acesso máximo",
+      operationalAccess: "Acesso operacional",
+      standardAccess: "Acesso padrão"
+    },
+    accessRequests: {
+      title: "Solicitações de acesso",
+      subtitle: "Aprove ou rejeite novos registros administrativos",
+      empty: "Nenhuma solicitação pendente no momento"
+    },
+    team: {
+      title: "Acesso da equipe",
+      subtitle: "Revise admins ativos e ajuste seus cargos"
+    },
+    logs: {
+      title: "Registro de atividade",
+      subtitle: "Aprovações, rejeições e mudanças de cargo recentes",
+      empty: "Nenhuma ação administrativa foi registrada ainda",
+      actor: "Autor",
+      target: "Alvo",
+      approvedAction: "aprovou",
+      rejectedAction: "rejeitou",
+      updatedAction: "atualizou",
+      changedAction: "alterou",
+      roleSetTo: "Cargo definido para",
+      requestRejected: "Solicitação de acesso movida para rejeitada",
+      roleChangedFrom: "Cargo alterado de",
+      to: "para",
+      permissionsTemplateChanged: "Modelo de permissões de cargo alterado",
+      adminStateUpdated: "Estado administrativo atualizado"
+    },
+    robloxLookup: {
+      title: "Leitura de dados do jogador",
+      subtitle: "Leia uma entrada do DataStore usando o ID do jogador como chave",
+      playerId: "ID do jogador",
+      entryKeyUsed: "Chave usada",
+      scope: "Escopo",
+      store: "DataStore",
+      empty: "Digite um ID de jogador e leia a entrada do DataStore usando esse ID como chave"
+    },
+    robloxAccount: {
+      title: "Conta Roblox",
+      enabledText: "A sincronização do avatar Roblox é solicitada uma vez no login e permanece salva na sua conta",
+      disabledText: "A sincronização do avatar Roblox está desativada no momento e pode ser reativada depois por variável de ambiente",
+      robloxLabel: "Roblox",
+      enableHint: "Defina ROBLOX_OAUTH_ENABLED=true quando quiser usar isso novamente",
+      openProfile: "Abrir perfil"
     }
   },
   es: {
@@ -155,6 +375,30 @@ const LANGUAGE_COPY = {
       protectedContent: "Contenido administrativo protegido",
       permissionsCount: "permisos",
       activeStatus: "activo"
+    },
+    states: {
+      updated: "Actualizado",
+      approved: "Aprobado",
+      approvedBy: "Aprobado por",
+      status: "Estado",
+      role: "Rol",
+      pending: "Pendiente",
+      requested: "Solicitado",
+      reading: "Leyendo",
+      readData: "Leer datos",
+      connected: "Conectado",
+      notConnected: "No conectado",
+      disabled: "Desactivado",
+      decisionSaved: "Decisión ya guardada",
+      save: "Guardar",
+      saving: "Guardando",
+      reset: "Restablecer",
+      editable: "Editable",
+      locked: "Bloqueado",
+      enabled: "Activado",
+      saveRole: "Guardar rol",
+      approve: "Aprobar",
+      reject: "Rechazar"
     },
     tabs: {
       overview: {
@@ -212,6 +456,86 @@ const LANGUAGE_COPY = {
       sectionOneBody: "El tema y el idioma se guardan por cuenta admin para que cada persona use el panel como prefiera",
       sectionTwoTitle: "Idiomas disponibles",
       sectionTwoBody: "Inglés, Portugués de Brasil y Español ya están listos en esta primera versión"
+    },
+    overview: {
+      snapshotTitle: "Resumen de acceso",
+      myProfileTitle: "Mi perfil",
+      myProfileSubtitle: "Detalles de sesión y nivel actual de acceso",
+      username: "Usuario",
+      accessLevel: "Nivel de acceso",
+      memberSince: "Miembro desde",
+      lastLogin: "Último acceso",
+      permissions: "Permisos",
+      nextActions: "Siguientes acciones"
+    },
+    controlCenter: {
+      title: "Centro de control",
+      subtitle: "Interruptores en vivo para funciones protegidas del panel",
+      migrationTitle: "Migración de datos",
+      migrationDescription:
+        "Controla el flujo de migración de datos de Roblox que copia los datos guardados de un jugador de una experiencia a otra",
+      migrationFallback: "Pausa la migración aquí sin eliminar las rutas del backend",
+      stateLabel: "Estado",
+      modeLabel: "Modo",
+      liveWritable: "Escritura en vivo",
+      readOnly: "Solo lectura"
+    },
+    rolePermissions: {
+      title: "Permisos por rol",
+      subtitle: "Controla lo que cada rol de admin puede hacer dentro de este panel",
+      customizeRole: "Personaliza a qué puede acceder este rol",
+      usingDefaults: "Usando valores por defecto",
+      customPermissions: "Permisos personalizados",
+      permissionsSelected: "permisos seleccionados",
+      updatedBy: "Actualizado por",
+      savePermissions: "Guardar permisos",
+      selfRoleLocked: "Tu propio rol permanece bloqueado dentro de este panel",
+      highestAccess: "Acceso máximo",
+      operationalAccess: "Acceso operativo",
+      standardAccess: "Acceso estándar"
+    },
+    accessRequests: {
+      title: "Solicitudes de acceso",
+      subtitle: "Aprueba o rechaza nuevos registros administrativos",
+      empty: "No hay solicitudes pendientes en este momento"
+    },
+    team: {
+      title: "Acceso del equipo",
+      subtitle: "Revisa admins activos y ajusta sus roles"
+    },
+    logs: {
+      title: "Registro de actividad",
+      subtitle: "Aprobaciones, rechazos y cambios de rol recientes",
+      empty: "Aún no se registraron acciones administrativas",
+      actor: "Actor",
+      target: "Objetivo",
+      approvedAction: "aprobó",
+      rejectedAction: "rechazó",
+      updatedAction: "actualizó",
+      changedAction: "cambió",
+      roleSetTo: "Rol definido como",
+      requestRejected: "La solicitud de acceso fue movida a rechazada",
+      roleChangedFrom: "Rol cambiado de",
+      to: "a",
+      permissionsTemplateChanged: "La plantilla de permisos del rol cambió",
+      adminStateUpdated: "El estado administrativo fue actualizado"
+    },
+    robloxLookup: {
+      title: "Lectura de datos del jugador",
+      subtitle: "Lee una entrada del DataStore usando el ID del jugador como clave",
+      playerId: "ID del jugador",
+      entryKeyUsed: "Clave usada",
+      scope: "Ámbito",
+      store: "DataStore",
+      empty: "Ingresa un ID de jugador y lee la entrada del DataStore usando ese ID como clave"
+    },
+    robloxAccount: {
+      title: "Cuenta de Roblox",
+      enabledText: "La sincronización del avatar de Roblox se solicita una vez durante el inicio de sesión y queda guardada en tu cuenta",
+      disabledText: "La sincronización del avatar de Roblox está desactivada por ahora y puede reactivarse más adelante con una variable de entorno",
+      robloxLabel: "Roblox",
+      enableHint: "Define ROBLOX_OAUTH_ENABLED=true cuando quieras volver a usar esto",
+      openProfile: "Abrir perfil"
     }
   }
 };
@@ -231,6 +555,30 @@ const LANGUAGE_LABELS = {
 
 function getLocaleCopy(language) {
   return LANGUAGE_COPY[language] || LANGUAGE_COPY.en;
+}
+
+function translateOverviewLabel(label, copy) {
+  const labels = {
+    "Signed in as": copy.overview.username,
+    Role: copy.states.role,
+    "Pending requests": copy.accessRequests.title,
+    "Game migration": copy.controlCenter.migrationTitle
+  };
+
+  return labels[label] || label;
+}
+
+function translateActivityItem(item, copy) {
+  const labels = {
+    "Approve new admin requests": copy.accessRequests.subtitle,
+    "Adjust roles for the team": copy.team.subtitle,
+    "Review recent permission changes": copy.logs.subtitle,
+    "Customize what each admin role can access": copy.rolePermissions.subtitle,
+    "Control the Roblox migration flow": copy.controlCenter.migrationDescription,
+    "Read Roblox DataStore entries": copy.robloxLookup.subtitle
+  };
+
+  return labels[item] || item;
 }
 
 function formatTimestamp(value) {
@@ -300,58 +648,59 @@ function sortRolePermissionConfigs(rolePermissions) {
   });
 }
 
-function getRoleAccessSummary(role) {
+function getRoleAccessSummary(role, copy) {
   if (role === "supreme") {
-    return "Highest access";
+    return copy.rolePermissions.highestAccess;
   }
 
   if (role === "moderator") {
-    return "Operational access";
+    return copy.rolePermissions.operationalAccess;
   }
 
-  return "Standard access";
+  return copy.rolePermissions.standardAccess;
 }
 
-function formatPermissionLabel(permission) {
-  return PERMISSION_LABELS[permission] || permission;
+function formatPermissionLabel(permission, language) {
+  const label = PERMISSION_LABELS[permission];
+  return label?.[language] || label?.en || permission;
 }
 
-function describeAuditEvent(event) {
+function describeAuditEvent(event, copy) {
   const actorName = event?.actor?.username || "Unknown";
   const targetName = event?.target?.username || "Unknown";
   const details = event?.details || {};
 
   if (event?.type === "user.approved") {
     return {
-      title: `${actorName} approved ${targetName}`,
-      summary: `Role set to ${details.nextRoleLabel || event?.target?.roleLabel || "Unknown"}`
+      title: `${actorName} ${copy.logs.approvedAction} ${targetName}`,
+      summary: `${copy.logs.roleSetTo} ${details.nextRoleLabel || event?.target?.roleLabel || "Unknown"}`
     };
   }
 
   if (event?.type === "user.rejected") {
     return {
-      title: `${actorName} rejected ${targetName}`,
-      summary: "Access request moved to rejected"
+      title: `${actorName} ${copy.logs.rejectedAction} ${targetName}`,
+      summary: copy.logs.requestRejected
     };
   }
 
   if (event?.type === "user.role_changed") {
     return {
-      title: `${actorName} updated ${targetName}`,
-      summary: `Role changed from ${details.previousRoleLabel || "Unknown"} to ${details.nextRoleLabel || "Unknown"}`
+      title: `${actorName} ${copy.logs.updatedAction} ${targetName}`,
+      summary: `${copy.logs.roleChangedFrom} ${details.previousRoleLabel || "Unknown"} ${copy.logs.to} ${details.nextRoleLabel || "Unknown"}`
     };
   }
 
   if (event?.type === "role.permissions_updated") {
     return {
-      title: `${actorName} updated ${details.roleLabel || targetName}`,
-      summary: "Role permissions template changed"
+      title: `${actorName} ${copy.logs.updatedAction} ${details.roleLabel || targetName}`,
+      summary: copy.logs.permissionsTemplateChanged
     };
   }
 
   return {
-    title: `${actorName} changed ${targetName}`,
-    summary: "Admin state updated"
+    title: `${actorName} ${copy.logs.changedAction} ${targetName}`,
+    summary: copy.logs.adminStateUpdated
   };
 }
 
@@ -468,18 +817,18 @@ function SidebarNavItem({ tab, active, onSelect }) {
   );
 }
 
-function RobloxConnectCard({ currentUser, robloxOauthEnabled }) {
+function RobloxConnectCard({ currentUser, robloxOauthEnabled, copy }) {
   const connected = Boolean(currentUser.robloxUserId && currentUser.robloxAvatarUrl);
   const decided = Boolean(currentUser.robloxOauthStatus);
 
   return (
     <section className="admin-shell admin-section compact-section">
       <div className="section-head">
-        <h2>Roblox account</h2>
+        <h2>{copy.robloxAccount.title}</h2>
         <p>
           {robloxOauthEnabled
-            ? "Roblox avatar sync is requested once during login and stays saved on your account"
-            : "Roblox avatar sync is currently disabled and can be reactivated later with an environment variable"}
+            ? copy.robloxAccount.enabledText
+            : copy.robloxAccount.disabledText}
         </p>
       </div>
 
@@ -488,18 +837,18 @@ function RobloxConnectCard({ currentUser, robloxOauthEnabled }) {
           <span>
             {robloxOauthEnabled
               ? connected
-                ? "Connected"
-                : "Not connected"
-              : "Disabled"}
+                ? copy.states.connected
+                : copy.states.notConnected
+              : copy.states.disabled}
           </span>
           {currentUser.robloxUsername ? (
-            <span>Roblox: {currentUser.robloxUsername}</span>
+            <span>{copy.robloxAccount.robloxLabel}: {currentUser.robloxUsername}</span>
           ) : null}
           {!connected && decided && robloxOauthEnabled ? (
-            <span>Decision already saved</span>
+            <span>{copy.states.decisionSaved}</span>
           ) : null}
           {!robloxOauthEnabled ? (
-            <span>Set ROBLOX_OAUTH_ENABLED=true when you want to use it again</span>
+            <span>{copy.robloxAccount.enableHint}</span>
           ) : null}
         </div>
 
@@ -511,7 +860,7 @@ function RobloxConnectCard({ currentUser, robloxOauthEnabled }) {
               target="_blank"
               rel="noreferrer"
             >
-              Open profile
+              {copy.robloxAccount.openProfile}
             </a>
           ) : null}
         </div>
@@ -626,6 +975,7 @@ function SettingsPanel({
 }
 
 function ControlCard({
+  copy,
   title,
   description,
   enabled,
@@ -648,7 +998,7 @@ function ControlCard({
           type="button"
           role="switch"
           aria-checked={enabled}
-          aria-label={`${enabled ? "Disable" : "Enable"} ${title}`}
+          aria-label={`${enabled ? copy.states.disabled : copy.states.enabled} ${title}`}
           onClick={onToggle}
           disabled={status === "loading" || !writable}
         >
@@ -660,8 +1010,12 @@ function ControlCard({
       </div>
 
       <div className="lookup-meta control-card__meta">
-        <span>State: {enabled ? "Enabled" : "Disabled"}</span>
-        <span>Mode: {writable ? "Live writable" : "Read only"}</span>
+        <span>
+          {copy.controlCenter.stateLabel}: {enabled ? copy.states.enabled : copy.states.disabled}
+        </span>
+        <span>
+          {copy.controlCenter.modeLabel}: {writable ? copy.controlCenter.liveWritable : copy.controlCenter.readOnly}
+        </span>
       </div>
 
       {error ? <p className="support-copy control-card__copy">{error}</p> : null}
@@ -673,6 +1027,7 @@ function ControlCard({
 }
 
 function UserCard({
+  copy,
   user,
   availableRoles,
   roleValue,
@@ -692,23 +1047,23 @@ function UserCard({
         <div>
           <h3>{user.username}</h3>
           <p>
-            {pending ? "Requested" : "Approved"} {formatTimestamp(user.createdAt)}
+            {pending ? copy.states.requested : copy.states.approved} {formatTimestamp(user.createdAt)}
           </p>
         </div>
         <span className="dataset-badge">
-          {pending ? "Pending" : user.roleLabel}
+          {pending ? copy.states.pending : user.roleLabel}
         </span>
       </div>
 
       <div className="lookup-meta member-card__meta">
-        <span>Status: {user.status}</span>
-        <span>Role: {user.roleLabel}</span>
-        {user.approvedAt ? <span>Updated {formatTimestamp(user.approvedAt)}</span> : null}
+        <span>{copy.states.status}: {user.status === "active" ? copy.shell.activeStatus : user.status}</span>
+        <span>{copy.states.role}: {user.roleLabel}</span>
+        {user.approvedAt ? <span>{copy.states.updated} {formatTimestamp(user.approvedAt)}</span> : null}
       </div>
 
       <div className="member-card__controls">
         <label className="field-label" htmlFor={`role-${user.id}`}>
-          Role
+          {copy.states.role}
         </label>
         <select
           id={`role-${user.id}`}
@@ -726,7 +1081,7 @@ function UserCard({
       </div>
 
       {isCurrentUser ? (
-        <p className="support-note">Your own role stays locked inside this panel</p>
+        <p className="support-note">{copy.rolePermissions.selfRoleLocked}</p>
       ) : null}
 
       <div className="member-card__actions">
@@ -738,7 +1093,7 @@ function UserCard({
               disabled={busy}
               onClick={() => onApprove(user.id, roleValue)}
             >
-              {busy ? "Saving" : "Approve"}
+              {busy ? copy.states.saving : copy.states.approve}
             </button>
             <button
               className="secondary-button"
@@ -746,7 +1101,7 @@ function UserCard({
               disabled={busy}
               onClick={() => onReject(user.id)}
             >
-              {busy ? "Saving" : "Reject"}
+              {busy ? copy.states.saving : copy.states.reject}
             </button>
           </>
         ) : (
@@ -756,15 +1111,15 @@ function UserCard({
             disabled={busy || isCurrentUser || roleValue === user.role}
             onClick={() => onSaveRole(user.id, roleValue)}
           >
-            {busy ? "Saving" : "Save role"}
+            {busy ? copy.states.saving : copy.states.saveRole}
           </button>
         )}
       </div>
     </article>
   );
 }
-function AuditEventCard({ event }) {
-  const description = describeAuditEvent(event);
+function AuditEventCard({ event, copy }) {
+  const description = describeAuditEvent(event, copy);
 
   return (
     <article className="audit-card">
@@ -777,10 +1132,10 @@ function AuditEventCard({ event }) {
       </div>
 
       <div className="lookup-meta audit-card__meta">
-        {event.actor ? <span>Actor: {event.actor.username}</span> : null}
-        {event.target ? <span>Target: {event.target.username}</span> : null}
+        {event.actor ? <span>{copy.logs.actor}: {event.actor.username}</span> : null}
+        {event.target ? <span>{copy.logs.target}: {event.target.username}</span> : null}
         {event.details?.nextRoleLabel ? (
-          <span>Role: {event.details.nextRoleLabel}</span>
+          <span>{copy.states.role}: {event.details.nextRoleLabel}</span>
         ) : null}
       </div>
     </article>
@@ -788,6 +1143,7 @@ function AuditEventCard({ event }) {
 }
 
 function RolePermissionCard({
+  copy,
   roleConfig,
   availablePermissions,
   draftPermissions,
@@ -803,7 +1159,7 @@ function RolePermissionCard({
     roleConfig.permissions || []
   );
   const permissionCount = selectedPermissions.length;
-  const accessSummary = getRoleAccessSummary(roleConfig.role);
+  const accessSummary = getRoleAccessSummary(roleConfig.role, copy);
 
   return (
     <article className={`permission-card permission-card--${roleConfig.role}`}>
@@ -811,10 +1167,10 @@ function RolePermissionCard({
         <div>
           <p className="permission-card__eyebrow">{accessSummary}</p>
           <h3>{roleConfig.label}</h3>
-          <p>{roleConfig.note || "Customize what this role can access"}</p>
+          <p>{roleConfig.note || copy.rolePermissions.customizeRole}</p>
         </div>
         <span className="dataset-badge">
-          {roleConfig.editable ? "Editable" : "Locked"}
+          {roleConfig.editable ? copy.states.editable : copy.states.locked}
         </span>
       </div>
 
@@ -822,12 +1178,12 @@ function RolePermissionCard({
         <div className="permission-card__sidebar">
           <div className="lookup-meta permission-card__meta">
             <span>
-              State: {roleConfig.usesDefault ? "Using defaults" : "Custom permissions"}
+              {copy.controlCenter.stateLabel}: {roleConfig.usesDefault ? copy.rolePermissions.usingDefaults : copy.rolePermissions.customPermissions}
             </span>
-            <span>{permissionCount} permissions selected</span>
-            {roleConfig.updatedBy ? <span>Updated by {roleConfig.updatedBy}</span> : null}
+            <span>{permissionCount} {copy.rolePermissions.permissionsSelected}</span>
+            {roleConfig.updatedBy ? <span>{copy.rolePermissions.updatedBy} {roleConfig.updatedBy}</span> : null}
             {roleConfig.updatedAt ? (
-              <span>Updated {formatTimestamp(roleConfig.updatedAt)}</span>
+              <span>{copy.states.updated} {formatTimestamp(roleConfig.updatedAt)}</span>
             ) : null}
           </div>
 
@@ -839,7 +1195,7 @@ function RolePermissionCard({
                 disabled={busy || !changed}
                 onClick={() => onReset(roleConfig.role, roleConfig.permissions || [])}
               >
-                {busy ? "Saving" : "Reset"}
+                {busy ? copy.states.saving : copy.states.reset}
               </button>
               <button
                 className="submit-button"
@@ -847,7 +1203,7 @@ function RolePermissionCard({
                 disabled={busy || !changed}
                 onClick={() => onSave(roleConfig.role)}
               >
-                {busy ? "Saving" : "Save permissions"}
+                {busy ? copy.states.saving : copy.rolePermissions.savePermissions}
               </button>
             </div>
           ) : null}
@@ -1271,14 +1627,14 @@ function AdminApp() {
         <>
           <section className="admin-shell admin-section">
             <div className="section-head">
-              <h2>Access snapshot</h2>
-              <p>Updated {formatTimestamp(data.updatedAt)}</p>
+              <h2>{copy.overview.snapshotTitle}</h2>
+              <p>{copy.states.updated} {formatTimestamp(data.updatedAt)}</p>
             </div>
 
             <div className="card-grid">
               {data.overviewCards.map((card) => (
                 <article key={card.label} className="admin-card">
-                  <p>{card.label}</p>
+                  <p>{translateOverviewLabel(card.label, copy)}</p>
                   <strong>{card.value}</strong>
                 </article>
               ))}
@@ -1287,46 +1643,46 @@ function AdminApp() {
 
           <section className="admin-shell admin-section">
             <div className="section-head">
-              <h2>My profile</h2>
-              <p>Session details and current access level</p>
+              <h2>{copy.overview.myProfileTitle}</h2>
+              <p>{copy.overview.myProfileSubtitle}</p>
             </div>
 
             <div className="profile-grid">
               <article className="admin-card profile-card">
-                <p>Username</p>
+                <p>{copy.overview.username}</p>
                 <strong>{currentUser.username}</strong>
               </article>
               <article className="admin-card profile-card">
-                <p>Access level</p>
+                <p>{copy.overview.accessLevel}</p>
                 <strong>{currentUser.roleLabel}</strong>
               </article>
               <article className="admin-card profile-card">
-                <p>Member since</p>
+                <p>{copy.overview.memberSince}</p>
                 <strong>{formatTimestamp(currentUser.createdAt)}</strong>
               </article>
               <article className="admin-card profile-card">
-                <p>Last login</p>
+                <p>{copy.overview.lastLogin}</p>
                 <strong>{formatTimestamp(currentUser.lastLoginAt)}</strong>
               </article>
             </div>
 
             <article className="profile-panel">
               <div className="lookup-meta profile-panel__meta">
-                <span>Status: {currentUser.status}</span>
+                <span>{copy.states.status}: {currentUser.status === "active" ? copy.shell.activeStatus : currentUser.status}</span>
                 {currentUser.approvedAt ? (
-                  <span>Approved {formatTimestamp(currentUser.approvedAt)}</span>
+                  <span>{copy.states.approved} {formatTimestamp(currentUser.approvedAt)}</span>
                 ) : null}
                 {currentUser.approvedBy ? (
-                  <span>Approved by {currentUser.approvedBy}</span>
+                  <span>{copy.states.approvedBy} {currentUser.approvedBy}</span>
                 ) : null}
               </div>
 
               <div className="permission-block">
-                <h3>Permissions</h3>
+                <h3>{copy.overview.permissions}</h3>
                 <div className="permission-grid">
                   {currentUser.permissions.map((permission) => (
                     <span key={permission} className="permission-chip">
-                      {formatPermissionLabel(permission)}
+                      {formatPermissionLabel(permission, interfaceLanguage)}
                     </span>
                   ))}
                 </div>
@@ -1336,12 +1692,12 @@ function AdminApp() {
 
           <section className="admin-shell admin-section compact-section">
             <div className="section-head">
-              <h2>Next actions</h2>
+              <h2>{copy.overview.nextActions}</h2>
             </div>
 
             <ul className="activity-list">
               {data.activity.map((item) => (
-                <li key={item}>{item}</li>
+                <li key={item}>{translateActivityItem(item, copy)}</li>
               ))}
             </ul>
           </section>
@@ -1349,6 +1705,7 @@ function AdminApp() {
           <RobloxConnectCard
             currentUser={currentUser}
             robloxOauthEnabled={data.robloxOauthEnabled}
+            copy={copy}
           />
         </>
       );
@@ -1358,20 +1715,21 @@ function AdminApp() {
       return (
         <section className="admin-shell admin-section">
           <div className="section-head">
-            <h2>Control center</h2>
-            <p>Live switches for protected admin features</p>
+            <h2>{copy.controlCenter.title}</h2>
+            <p>{copy.controlCenter.subtitle}</p>
           </div>
 
           <div className="control-grid">
             <ControlCard
-              title="Game migration"
-              description="Controls the Roblox data migration flow that copies a player's saved data from one Roblox experience into another"
+              copy={copy}
+              title={copy.controlCenter.migrationTitle}
+              description={copy.controlCenter.migrationDescription}
               enabled={data.migrationControl.enabled}
               writable={data.migrationControl.writable}
               status={migrationState.status}
               note={
                 data.migrationControl.note ||
-                "Pause migration here without removing the backend routes"
+                copy.controlCenter.migrationFallback
               }
               error={migrationState.error}
               onToggle={() => handleMigrationToggle(!data.migrationControl.enabled)}
@@ -1385,14 +1743,15 @@ function AdminApp() {
       return (
         <section className="admin-shell admin-section">
           <div className="section-head">
-            <h2>Role permissions</h2>
-            <p>Control what each admin role can do inside this panel</p>
+            <h2>{copy.rolePermissions.title}</h2>
+            <p>{copy.rolePermissions.subtitle}</p>
           </div>
 
           <div className="permission-card-grid">
             {sortRolePermissionConfigs(data.rolePermissions).map((roleConfig) => (
               <RolePermissionCard
                 key={roleConfig.role}
+                copy={copy}
                 roleConfig={roleConfig}
                 availablePermissions={data.availablePermissions}
                 draftPermissions={
@@ -1434,8 +1793,8 @@ function AdminApp() {
       return (
         <section className="admin-shell admin-section">
           <div className="section-head">
-            <h2>Access requests</h2>
-            <p>Approve or reject pending admin registrations</p>
+            <h2>{copy.accessRequests.title}</h2>
+            <p>{copy.accessRequests.subtitle}</p>
           </div>
 
           {userActionState.error ? (
@@ -1447,6 +1806,7 @@ function AdminApp() {
               data.pendingUsers.map((user) => (
                 <UserCard
                   key={user.id}
+                  copy={copy}
                   user={user}
                   pending
                   isCurrentUser={false}
@@ -1468,7 +1828,7 @@ function AdminApp() {
               ))
             ) : (
               <p className="empty-copy panel-empty">
-                No pending requests right now
+                {copy.accessRequests.empty}
               </p>
             )}
           </div>
@@ -1480,14 +1840,15 @@ function AdminApp() {
       return (
         <section className="admin-shell admin-section">
           <div className="section-head">
-            <h2>Team access</h2>
-            <p>Review active admins and adjust their roles</p>
+            <h2>{copy.team.title}</h2>
+            <p>{copy.team.subtitle}</p>
           </div>
 
           <div className="member-grid">
             {data.activeUsers.map((user) => (
               <UserCard
                 key={user.id}
+                copy={copy}
                 user={user}
                 pending={false}
                 isCurrentUser={user.id === currentUser.id}
@@ -1516,18 +1877,18 @@ function AdminApp() {
       return (
         <section className="admin-shell admin-section">
           <div className="section-head">
-            <h2>Activity log</h2>
-            <p>Recent approvals, rejections and role changes</p>
+            <h2>{copy.logs.title}</h2>
+            <p>{copy.logs.subtitle}</p>
           </div>
 
           <div className="audit-grid">
             {data.auditEvents.length > 0 ? (
               data.auditEvents.map((event) => (
-                <AuditEventCard key={event.id} event={event} />
+                <AuditEventCard key={event.id} event={event} copy={copy} />
               ))
             ) : (
               <p className="empty-copy panel-empty">
-                No admin actions have been logged yet
+                {copy.logs.empty}
               </p>
             )}
           </div>
@@ -1539,13 +1900,13 @@ function AdminApp() {
       return (
         <section className="admin-shell admin-section">
           <div className="section-head">
-            <h2>Roblox player data lookup</h2>
-            <p>Read one DataStore entry using the player ID as the entry key</p>
+            <h2>{copy.robloxLookup.title}</h2>
+            <p>{copy.robloxLookup.subtitle}</p>
           </div>
 
           <form className="lookup-form" onSubmit={handlePlayerLookup}>
             <label className="field-label" htmlFor="player-id">
-              Player ID
+              {copy.robloxLookup.playerId}
             </label>
             <div className="lookup-controls">
               <input
@@ -1564,7 +1925,7 @@ function AdminApp() {
                 type="submit"
                 disabled={lookupState.status === "loading"}
               >
-                {lookupState.status === "loading" ? "Reading" : "Read data"}
+                {lookupState.status === "loading" ? copy.states.reading : copy.states.readData}
               </button>
             </div>
           </form>
@@ -1577,9 +1938,9 @@ function AdminApp() {
             {lookupState.payload ? (
               <>
                 <div className="lookup-meta">
-                  <span>Entry key used: {lookupState.payload.entryKeyUsed}</span>
-                  <span>Scope: {lookupState.payload.datastoreScope}</span>
-                  <span>Store: {lookupState.payload.datastoreName}</span>
+                  <span>{copy.robloxLookup.entryKeyUsed}: {lookupState.payload.entryKeyUsed}</span>
+                  <span>{copy.robloxLookup.scope}: {lookupState.payload.datastoreScope}</span>
+                  <span>{copy.robloxLookup.store}: {lookupState.payload.datastoreName}</span>
                 </div>
                 <pre className="result-code">
                   <code>{JSON.stringify(lookupState.payload.data, null, 2)}</code>
@@ -1587,7 +1948,7 @@ function AdminApp() {
               </>
             ) : (
               <p className="empty-copy">
-                Enter a player ID and read the DataStore entry using that ID as the key
+                {copy.robloxLookup.empty}
               </p>
             )}
           </div>
