@@ -1,6 +1,7 @@
 :root {
   --admin-bg: #050913;
   --admin-bg-soft: #0d1526;
+  --admin-bg-deep: #03060d;
   --admin-panel: rgba(8, 15, 29, 0.84);
   --admin-panel-strong: rgba(10, 18, 35, 0.94);
   --admin-text: #edf4ff;
@@ -9,11 +10,16 @@
   --admin-accent: #63aaff;
   --admin-accent-strong: #3d84df;
   --admin-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+  --admin-bg-glow-primary: rgba(54, 112, 202, 0.35);
+  --admin-bg-glow-secondary: rgba(37, 103, 199, 0.24);
+  --admin-star-primary: rgba(211, 232, 255, 0.45);
+  --admin-star-secondary: rgba(112, 165, 245, 0.24);
 }
 
 :root[data-admin-theme="ocean-cyan"] {
   --admin-bg: #041418;
   --admin-bg-soft: #0a232a;
+  --admin-bg-deep: #020d10;
   --admin-panel: rgba(5, 20, 24, 0.84);
   --admin-panel-strong: rgba(6, 26, 32, 0.94);
   --admin-text: #ebfcff;
@@ -21,11 +27,16 @@
   --admin-line: rgba(94, 231, 236, 0.22);
   --admin-accent: #63f1f7;
   --admin-accent-strong: #1ebec7;
+  --admin-bg-glow-primary: rgba(63, 214, 232, 0.28);
+  --admin-bg-glow-secondary: rgba(13, 155, 175, 0.22);
+  --admin-star-primary: rgba(208, 254, 255, 0.4);
+  --admin-star-secondary: rgba(86, 229, 233, 0.22);
 }
 
 :root[data-admin-theme="solar-amber"] {
   --admin-bg: #130c04;
   --admin-bg-soft: #24170a;
+  --admin-bg-deep: #090501;
   --admin-panel: rgba(24, 14, 7, 0.86);
   --admin-panel-strong: rgba(35, 19, 9, 0.94);
   --admin-text: #fff5e8;
@@ -33,6 +44,27 @@
   --admin-line: rgba(255, 186, 95, 0.2);
   --admin-accent: #ffc56f;
   --admin-accent-strong: #eb8d2d;
+  --admin-bg-glow-primary: rgba(255, 180, 75, 0.24);
+  --admin-bg-glow-secondary: rgba(219, 118, 26, 0.18);
+  --admin-star-primary: rgba(255, 236, 196, 0.34);
+  --admin-star-secondary: rgba(255, 193, 92, 0.16);
+}
+
+:root[data-admin-theme="rose-bloom"] {
+  --admin-bg: #180710;
+  --admin-bg-soft: #2a0d1d;
+  --admin-bg-deep: #0b0308;
+  --admin-panel: rgba(27, 10, 22, 0.86);
+  --admin-panel-strong: rgba(39, 13, 31, 0.94);
+  --admin-text: #fff0f6;
+  --admin-muted: #d7a9c0;
+  --admin-line: rgba(255, 137, 192, 0.2);
+  --admin-accent: #ff89c0;
+  --admin-accent-strong: #e15293;
+  --admin-bg-glow-primary: rgba(255, 118, 191, 0.24);
+  --admin-bg-glow-secondary: rgba(201, 69, 140, 0.18);
+  --admin-star-primary: rgba(255, 221, 236, 0.3);
+  --admin-star-secondary: rgba(255, 150, 204, 0.16);
 }
 
 * {
@@ -50,9 +82,9 @@ body {
   font-family: "Manrope", sans-serif;
   color: var(--admin-text);
   background:
-    radial-gradient(circle at 15% 0%, rgba(54, 112, 202, 0.35), transparent 35%),
-    radial-gradient(circle at 85% 0%, rgba(37, 103, 199, 0.24), transparent 30%),
-    linear-gradient(180deg, #03060d 0%, #09101d 50%, #050913 100%);
+    radial-gradient(circle at 15% 0%, var(--admin-bg-glow-primary), transparent 35%),
+    radial-gradient(circle at 85% 0%, var(--admin-bg-glow-secondary), transparent 30%),
+    linear-gradient(180deg, var(--admin-bg-deep) 0%, var(--admin-bg-soft) 50%, var(--admin-bg) 100%);
 }
 
 .admin-page {
@@ -67,8 +99,8 @@ body {
   pointer-events: none;
   opacity: 0.24;
   background-image:
-    radial-gradient(circle, rgba(211, 232, 255, 0.45) 0.7px, transparent 0.7px),
-    radial-gradient(circle, rgba(112, 165, 245, 0.24) 0.7px, transparent 0.7px);
+    radial-gradient(circle, var(--admin-star-primary) 0.7px, transparent 0.7px),
+    radial-gradient(circle, var(--admin-star-secondary) 0.7px, transparent 0.7px);
   background-position:
     0 0,
     18px 18px;
@@ -360,6 +392,10 @@ body {
 
 .settings-swatch--solar-amber {
   background: linear-gradient(135deg, #ffc56f, #eb8d2d);
+}
+
+.settings-swatch--rose-bloom {
+  background: linear-gradient(135deg, #ff89c0, #e15293);
 }
 
 .settings-submit {

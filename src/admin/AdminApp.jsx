@@ -225,7 +225,8 @@ const LANGUAGE_COPY = {
 const THEME_LABELS = {
   "galaxy-blue": "Galaxy Blue",
   "ocean-cyan": "Ocean Cyan",
-  "solar-amber": "Solar Amber"
+  "solar-amber": "Solar Amber",
+  "rose-bloom": "Rose Bloom"
 };
 
 const LANGUAGE_LABELS = {
