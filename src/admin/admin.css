@@ -1704,6 +1704,22 @@ body {
   gap: 14px;
 }
 
+.compact-section .roblox-connect-card {
+  justify-items: center;
+}
+
+.compact-section .roblox-connect-card .lookup-meta {
+  width: 100%;
+  margin-bottom: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.compact-section .roblox-connect-card .member-card__actions {
+  width: 100%;
+  justify-content: center;
+}
+
 .roblox-connect-button {
   min-width: 180px;
 }
