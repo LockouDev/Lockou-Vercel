@@ -4,6 +4,11 @@ import {
 } from "../../lib/admin-auth.js";
 import { listAdminAuditEvents } from "../../lib/admin-audit.js";
 import {
+  listAdminLanguages,
+  listAdminThemes,
+  readAdminPreferences
+} from "../../lib/admin-preferences.js";
+import {
   listAdminPermissions,
   listRolePermissionConfigs
 } from "../../lib/admin-roles.js";
@@ -67,12 +72,17 @@ export default {
       ? await listRolePermissionConfigs()
       : [];
 
+    const preferences = await readAdminPreferences(session.user.id);
+
     return createJsonResponse({
       heading: "Lockou Admin",
       environment: session.safeUser.roleLabel,
       updatedAt: new Date().toISOString(),
       currentUser: session.safeUser,
       robloxOauthEnabled: isRobloxOauthEnabled(),
+      preferences,
+      availableThemes: listAdminThemes(),
+      availableLanguages: listAdminLanguages(),
       capabilities: session.capabilities,
       availableRoles: getAvailableAdminRoles(session.user),
       overviewCards: [

@@ -12,16 +12,245 @@ const ROLE_PRIORITY = {
   moderator: 2
 };
 
+const LANGUAGE_COPY = {
+  en: {
+    shell: {
+      brandSubtitle: "Restricted workspace",
+      logout: "Logout",
+      leaving: "Leaving",
+      protectedContent: "Protected admin content"
+    },
+    tabs: {
+      overview: {
+        label: "Overview",
+        heading: "Admin overview",
+        description: "Profile, access summary and next actions"
+      },
+      controlCenter: {
+        label: "Control center",
+        heading: "Control center",
+        description: "Live switches for protected admin features"
+      },
+      rolePermissions: {
+        label: "Role permissions",
+        heading: "Role permissions",
+        description: "Control what each admin role can do inside this panel"
+      },
+      accessRequests: {
+        label: "Access requests",
+        heading: "Access requests",
+        description: "Approve or reject pending admin registrations"
+      },
+      team: {
+        label: "Team",
+        heading: "Team access",
+        description: "Review active admins and adjust their roles"
+      },
+      logs: {
+        label: "Logs",
+        heading: "Activity log",
+        description: "Recent approvals, rejections and role changes"
+      },
+      robloxLookup: {
+        label: "Roblox data",
+        heading: "Roblox player data lookup",
+        description: "Read one DataStore entry using the player ID as the entry key"
+      },
+      settings: {
+        label: "Settings",
+        heading: "Workspace settings",
+        description: "Choose your panel language and visual theme"
+      }
+    },
+    settings: {
+      title: "Settings",
+      subtitle: "Personalize this admin workspace and keep your preferences saved",
+      themeTitle: "Theme color",
+      themeDescription: "Choose the color system used by this admin panel",
+      languageTitle: "Language",
+      languageDescription: "Choose how the admin shell and navigation should be displayed",
+      save: "Save settings",
+      saving: "Saving",
+      saved: "Settings updated",
+      suggestionsTitle: "Ideas for later",
+      suggestionOne: "Compact mode for denser tables and cards",
+      suggestionTwo: "Optional motion reduction for calmer transitions",
+      suggestionThree: "Custom date and time format per admin",
+      sectionOneTitle: "Current experience",
+      sectionOneBody: "Theme and language are saved per admin account so each person can use the panel in their preferred style",
+      sectionTwoTitle: "Available languages",
+      sectionTwoBody: "English, Portuguese - Brazil and Spanish are ready in this first pass"
+    }
+  },
+  "pt-BR": {
+    shell: {
+      brandSubtitle: "Workspace restrito",
+      logout: "Sair",
+      leaving: "Saindo",
+      protectedContent: "Conteúdo administrativo protegido"
+    },
+    tabs: {
+      overview: {
+        label: "Visão geral",
+        heading: "Visão geral do admin",
+        description: "Perfil, resumo de acesso e próximos passos"
+      },
+      controlCenter: {
+        label: "Central de controle",
+        heading: "Central de controle",
+        description: "Interruptores ao vivo para recursos protegidos do painel"
+      },
+      rolePermissions: {
+        label: "Permissões de cargo",
+        heading: "Permissões de cargo",
+        description: "Controle o que cada cargo de admin pode fazer neste painel"
+      },
+      accessRequests: {
+        label: "Solicitações",
+        heading: "Solicitações de acesso",
+        description: "Aprove ou rejeite novos registros administrativos"
+      },
+      team: {
+        label: "Equipe",
+        heading: "Acesso da equipe",
+        description: "Revise admins ativos e ajuste seus cargos"
+      },
+      logs: {
+        label: "Logs",
+        heading: "Registro de atividade",
+        description: "Aprovações, rejeições e mudanças de cargo recentes"
+      },
+      robloxLookup: {
+        label: "Dados Roblox",
+        heading: "Leitura de dados do jogador",
+        description: "Leia uma entrada do DataStore usando o ID do jogador como chave"
+      },
+      settings: {
+        label: "Configurações",
+        heading: "Configurações do workspace",
+        description: "Escolha o idioma do painel e o tema visual"
+      }
+    },
+    settings: {
+      title: "Configurações",
+      subtitle: "Personalize este workspace administrativo e mantenha suas preferências salvas",
+      themeTitle: "Tema de cor",
+      themeDescription: "Escolha a paleta usada por este painel administrativo",
+      languageTitle: "Idioma",
+      languageDescription: "Escolha como o shell do admin e a navegação devem aparecer",
+      save: "Salvar configurações",
+      saving: "Salvando",
+      saved: "Configurações atualizadas",
+      suggestionsTitle: "Ideias para depois",
+      suggestionOne: "Modo compacto para tabelas e cards mais densos",
+      suggestionTwo: "Redução opcional de animações para transições mais calmas",
+      suggestionThree: "Formato de data e hora personalizado por admin",
+      sectionOneTitle: "Experiência atual",
+      sectionOneBody: "Tema e idioma ficam salvos por conta admin para cada pessoa usar o painel do jeito que preferir",
+      sectionTwoTitle: "Idiomas disponíveis",
+      sectionTwoBody: "Inglês, Português - Brasil e Espanhol já estão prontos nesta primeira versão"
+    }
+  },
+  es: {
+    shell: {
+      brandSubtitle: "Espacio restringido",
+      logout: "Salir",
+      leaving: "Saliendo",
+      protectedContent: "Contenido administrativo protegido"
+    },
+    tabs: {
+      overview: {
+        label: "Resumen",
+        heading: "Resumen del admin",
+        description: "Perfil, resumen de acceso y siguientes pasos"
+      },
+      controlCenter: {
+        label: "Centro de control",
+        heading: "Centro de control",
+        description: "Interruptores en vivo para funciones protegidas del panel"
+      },
+      rolePermissions: {
+        label: "Permisos por rol",
+        heading: "Permisos por rol",
+        description: "Controla lo que cada rol de admin puede hacer dentro de este panel"
+      },
+      accessRequests: {
+        label: "Solicitudes",
+        heading: "Solicitudes de acceso",
+        description: "Aprueba o rechaza nuevos registros administrativos"
+      },
+      team: {
+        label: "Equipo",
+        heading: "Acceso del equipo",
+        description: "Revisa admins activos y ajusta sus roles"
+      },
+      logs: {
+        label: "Logs",
+        heading: "Registro de actividad",
+        description: "Aprobaciones, rechazos y cambios de rol recientes"
+      },
+      robloxLookup: {
+        label: "Datos Roblox",
+        heading: "Lectura de datos del jugador",
+        description: "Lee una entrada del DataStore usando el ID del jugador como clave"
+      },
+      settings: {
+        label: "Configuración",
+        heading: "Configuración del espacio",
+        description: "Elige el idioma del panel y el tema visual"
+      }
+    },
+    settings: {
+      title: "Configuración",
+      subtitle: "Personaliza este espacio administrativo y guarda tus preferencias",
+      themeTitle: "Tema de color",
+      themeDescription: "Elige la paleta usada por este panel administrativo",
+      languageTitle: "Idioma",
+      languageDescription: "Elige cómo deben mostrarse la navegación y el shell del admin",
+      save: "Guardar configuración",
+      saving: "Guardando",
+      saved: "Configuración actualizada",
+      suggestionsTitle: "Ideas para después",
+      suggestionOne: "Modo compacto para tablas y tarjetas más densas",
+      suggestionTwo: "Reducción opcional de movimiento para transiciones más suaves",
+      suggestionThree: "Formato de fecha y hora personalizado por admin",
+      sectionOneTitle: "Experiencia actual",
+      sectionOneBody: "El tema y el idioma se guardan por cuenta admin para que cada persona use el panel como prefiera",
+      sectionTwoTitle: "Idiomas disponibles",
+      sectionTwoBody: "Inglés, Portugués de Brasil y Español ya están listos en esta primera versión"
+    }
+  }
+};
+
+const THEME_LABELS = {
+  "galaxy-blue": "Galaxy Blue",
+  "ocean-cyan": "Ocean Cyan",
+  "solar-amber": "Solar Amber"
+};
+
+const LANGUAGE_LABELS = {
+  en: "English",
+  "pt-BR": "Português - Brasil",
+  es: "Español"
+};
+
+function getLocaleCopy(language) {
+  return LANGUAGE_COPY[language] || LANGUAGE_COPY.en;
+}
+
 function formatTimestamp(value) {
   if (!value) {
     return "Unknown";
   }
 
   try {
-    return new Intl.DateTimeFormat("pt-BR", {
+    return new Intl.DateTimeFormat(
+      document.documentElement.lang || "en",
+      {
       dateStyle: "medium",
       timeStyle: "short"
-    }).format(new Date(value));
+      }
+    ).format(new Date(value));
   } catch {
     return value;
   }
@@ -131,13 +360,13 @@ function describeAuditEvent(event) {
   };
 }
 
-function buildAdminTabs(capabilities, pendingCount) {
+function buildAdminTabs(capabilities, pendingCount, copy) {
   const tabs = [
     {
       id: "overview",
-      label: "Overview",
-      heading: "Admin overview",
-      description: "Profile, access summary and next actions",
+      label: copy.tabs.overview.label,
+      heading: copy.tabs.overview.heading,
+      description: copy.tabs.overview.description,
       icon: "bi-grid-1x2-fill"
     }
   ];
@@ -145,9 +374,9 @@ function buildAdminTabs(capabilities, pendingCount) {
   if (capabilities.canControlMigration) {
     tabs.push({
       id: "control-center",
-      label: "Control center",
-      heading: "Control center",
-      description: "Live switches for protected admin features",
+      label: copy.tabs.controlCenter.label,
+      heading: copy.tabs.controlCenter.heading,
+      description: copy.tabs.controlCenter.description,
       icon: "bi-toggles2"
     });
   }
@@ -155,9 +384,9 @@ function buildAdminTabs(capabilities, pendingCount) {
   if (capabilities.canManageRolePermissions) {
     tabs.push({
       id: "role-permissions",
-      label: "Role permissions",
-      heading: "Role permissions",
-      description: "Control what each admin role can do inside this panel",
+      label: copy.tabs.rolePermissions.label,
+      heading: copy.tabs.rolePermissions.heading,
+      description: copy.tabs.rolePermissions.description,
       icon: "bi-shield-lock-fill"
     });
   }
@@ -165,24 +394,24 @@ function buildAdminTabs(capabilities, pendingCount) {
   if (capabilities.canManageUsers) {
     tabs.push({
       id: "access-requests",
-      label: "Access requests",
-      heading: "Access requests",
-      description: "Approve or reject pending admin registrations",
+      label: copy.tabs.accessRequests.label,
+      heading: copy.tabs.accessRequests.heading,
+      description: copy.tabs.accessRequests.description,
       icon: "bi-person-plus-fill",
       badge: pendingCount > 0 ? String(pendingCount) : ""
     });
     tabs.push({
       id: "team",
-      label: "Team",
-      heading: "Team access",
-      description: "Review active admins and adjust their roles",
+      label: copy.tabs.team.label,
+      heading: copy.tabs.team.heading,
+      description: copy.tabs.team.description,
       icon: "bi-people-fill"
     });
     tabs.push({
       id: "logs",
-      label: "Logs",
-      heading: "Activity log",
-      description: "Recent approvals, rejections and role changes",
+      label: copy.tabs.logs.label,
+      heading: copy.tabs.logs.heading,
+      description: copy.tabs.logs.description,
       icon: "bi-journal-richtext"
     });
   }
@@ -190,12 +419,20 @@ function buildAdminTabs(capabilities, pendingCount) {
   if (capabilities.canReadRobloxData) {
     tabs.push({
       id: "roblox-lookup",
-      label: "Roblox data",
-      heading: "Roblox player data lookup",
-      description: "Read one DataStore entry using the player ID as the entry key",
+      label: copy.tabs.robloxLookup.label,
+      heading: copy.tabs.robloxLookup.heading,
+      description: copy.tabs.robloxLookup.description,
       icon: "bi-database-fill-gear"
     });
   }
+
+  tabs.push({
+    id: "settings",
+    label: copy.tabs.settings.label,
+    heading: copy.tabs.settings.heading,
+    description: copy.tabs.settings.description,
+    icon: "bi-sliders2"
+  });
 
   return tabs;
 }
@@ -284,6 +521,120 @@ function RobloxConnectCard({ currentUser, robloxOauthEnabled }) {
           ) : null}
         </div>
       </div>
+    </section>
+  );
+}
+
+function SettingsPanel({
+  copy,
+  preferencesDraft,
+  availableThemes,
+  availableLanguages,
+  preferencesState,
+  onThemeChange,
+  onLanguageChange,
+  onSubmit
+}) {
+  return (
+    <section className="admin-shell admin-section">
+      <div className="section-head">
+        <h2>{copy.settings.title}</h2>
+        <p>{copy.settings.subtitle}</p>
+      </div>
+
+      <form className="settings-grid" onSubmit={onSubmit}>
+        <article className="settings-card">
+          <h3>{copy.settings.themeTitle}</h3>
+          <p>{copy.settings.themeDescription}</p>
+          <div className="settings-options">
+            {availableThemes.map((theme) => (
+              <label
+                key={theme}
+                className={`settings-option${
+                  preferencesDraft.theme === theme ? " is-selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="theme"
+                  value={theme}
+                  checked={preferencesDraft.theme === theme}
+                  onChange={(event) => onThemeChange(event.target.value)}
+                />
+                <span className={`settings-swatch settings-swatch--${theme}`} />
+                <span>{THEME_LABELS[theme] || theme}</span>
+              </label>
+            ))}
+          </div>
+        </article>
+
+        <article className="settings-card">
+          <h3>{copy.settings.languageTitle}</h3>
+          <p>{copy.settings.languageDescription}</p>
+          <div className="settings-options settings-options--languages">
+            {availableLanguages.map((language) => (
+              <label
+                key={language}
+                className={`settings-option${
+                  preferencesDraft.language === language ? " is-selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="language"
+                  value={language}
+                  checked={preferencesDraft.language === language}
+                  onChange={(event) => onLanguageChange(event.target.value)}
+                />
+                <span>{LANGUAGE_LABELS[language] || language}</span>
+              </label>
+            ))}
+          </div>
+        </article>
+
+        <article className="settings-card">
+          <h3>{copy.settings.sectionOneTitle}</h3>
+          <p>{copy.settings.sectionOneBody}</p>
+        </article>
+
+        <article className="settings-card">
+          <h3>{copy.settings.sectionTwoTitle}</h3>
+          <p>{copy.settings.sectionTwoBody}</p>
+        </article>
+
+        <article className="settings-card settings-card--wide">
+          <div className="settings-submit">
+            <div className="settings-suggestions">
+              <strong>{copy.settings.suggestionsTitle}</strong>
+              <ul>
+                <li>{copy.settings.suggestionOne}</li>
+                <li>{copy.settings.suggestionTwo}</li>
+                <li>{copy.settings.suggestionThree}</li>
+              </ul>
+            </div>
+
+            <div className="settings-submit__actions">
+              {preferencesState.error ? (
+                <p className="error-copy">{preferencesState.error}</p>
+              ) : null}
+              {preferencesState.status === "ready" ? (
+                <p className="status-copy status-copy--success">
+                  {copy.settings.saved}
+                </p>
+              ) : null}
+              <button
+                className="submit-button"
+                type="submit"
+                disabled={preferencesState.status === "loading"}
+              >
+                {preferencesState.status === "loading"
+                  ? copy.settings.saving
+                  : copy.settings.save}
+              </button>
+            </div>
+          </div>
+        </article>
+      </form>
     </section>
   );
 }
@@ -582,9 +933,17 @@ function AdminApp() {
     role: "",
     error: ""
   });
+  const [preferencesState, setPreferencesState] = useState({
+    status: "idle",
+    error: ""
+  });
   const [pendingRoleDrafts, setPendingRoleDrafts] = useState({});
   const [activeRoleDrafts, setActiveRoleDrafts] = useState({});
   const [rolePermissionDrafts, setRolePermissionDrafts] = useState({});
+  const [preferencesDraft, setPreferencesDraft] = useState({
+    theme: "galaxy-blue",
+    language: "en"
+  });
 
   const loadOverview = useCallback(async () => {
     try {
@@ -606,6 +965,7 @@ function AdminApp() {
       setPendingRoleDrafts(createRoleDraftMap(payload.pendingUsers));
       setActiveRoleDrafts(createRoleDraftMap(payload.activeUsers));
       setRolePermissionDrafts(createRolePermissionDraftMap(payload.rolePermissions));
+      setPreferencesDraft(payload.preferences || { theme: "galaxy-blue", language: "en" });
       setPageState({
         status: "ready",
         data: payload,
@@ -624,6 +984,10 @@ function AdminApp() {
     loadOverview();
   }, [loadOverview]);
 
+  const interfaceLanguage =
+    pageState.status === "ready" ? pageState.data.preferences?.language || "en" : "en";
+  const copy = useMemo(() => getLocaleCopy(interfaceLanguage), [interfaceLanguage]);
+
   const availableTabs = useMemo(() => {
     if (pageState.status !== "ready") {
       return [];
@@ -631,9 +995,21 @@ function AdminApp() {
 
     return buildAdminTabs(
       pageState.data.capabilities,
-      pageState.data.pendingUsers.length
+      pageState.data.pendingUsers.length,
+      copy
     );
-  }, [pageState]);
+  }, [copy, pageState]);
+
+  useEffect(() => {
+    const theme =
+      pageState.status === "ready"
+        ? pageState.data.preferences?.theme || "galaxy-blue"
+        : "galaxy-blue";
+
+    document.documentElement.lang = interfaceLanguage;
+    document.documentElement.dataset.adminTheme = theme;
+    document.body.dataset.adminTheme = theme;
+  }, [interfaceLanguage, pageState]);
 
   useEffect(() => {
     if (pageState.status !== "ready" || availableTabs.length === 0) {
@@ -657,6 +1033,51 @@ function AdminApp() {
       });
     } finally {
       window.location.replace("/admin-login");
+    }
+  }
+
+  async function handleSavePreferences(event) {
+    event.preventDefault();
+    setPreferencesState({
+      status: "loading",
+      error: ""
+    });
+
+    try {
+      const response = await fetch("/api/admin/preferences", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json"
+        },
+        body: JSON.stringify(preferencesDraft)
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Failed to save settings");
+      }
+
+      setPageState((current) => ({
+        ...current,
+        data: {
+          ...current.data,
+          preferences: payload.preferences,
+          availableThemes: payload.availableThemes || current.data.availableThemes,
+          availableLanguages:
+            payload.availableLanguages || current.data.availableLanguages
+        }
+      }));
+      setPreferencesDraft(payload.preferences);
+      setPreferencesState({
+        status: "ready",
+        error: ""
+      });
+    } catch (error) {
+      setPreferencesState({
+        status: "error",
+        error: error.message || "Failed to save settings"
+      });
     }
   }
 
@@ -1188,6 +1609,39 @@ function AdminApp() {
       );
     }
 
+    if (activeTabConfig.id === "settings") {
+      return (
+        <SettingsPanel
+          copy={copy}
+          preferencesDraft={preferencesDraft}
+          availableThemes={data.availableThemes || []}
+          availableLanguages={data.availableLanguages || []}
+          preferencesState={preferencesState}
+          onThemeChange={(theme) => {
+            setPreferencesState({
+              status: "idle",
+              error: ""
+            });
+            setPreferencesDraft((current) => ({
+              ...current,
+              theme
+            }));
+          }}
+          onLanguageChange={(language) => {
+            setPreferencesState({
+              status: "idle",
+              error: ""
+            });
+            setPreferencesDraft((current) => ({
+              ...current,
+              language
+            }));
+          }}
+          onSubmit={handleSavePreferences}
+        />
+      );
+    }
+
     return null;
   }
 
@@ -1199,7 +1653,7 @@ function AdminApp() {
             <span className="sidebar-brand__mark">LK</span>
             <div className="sidebar-brand__copy">
               <strong>Lockou Admin</strong>
-              <span>Restricted workspace</span>
+              <span>{copy.shell.brandSubtitle}</span>
             </div>
           </div>
 
@@ -1251,7 +1705,9 @@ function AdminApp() {
               <span className="sidebar-logout__icon" aria-hidden="true">
                 <i className="bi bi-box-arrow-right" />
               </span>
-              <span>{logoutState === "loading" ? "Leaving" : "Logout"}</span>
+              <span>
+                {logoutState === "loading" ? copy.shell.leaving : copy.shell.logout}
+              </span>
             </button>
           </div>
         </aside>
@@ -1262,7 +1718,7 @@ function AdminApp() {
               <p className="eyebrow">{activeTabConfig?.label || "Admin"}</p>
               <h1>{activeTabConfig?.heading || data.heading}</h1>
               <p className="support-copy">
-                {activeTabConfig?.description || "Protected admin content"}
+                {activeTabConfig?.description || copy.shell.protectedContent}
               </p>
             </div>
 
