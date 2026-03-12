@@ -72,10 +72,6 @@ const LANGUAGE_COPY = {
       save: "Save settings",
       saving: "Saving",
       saved: "Settings updated",
-      suggestionsTitle: "Ideas for later",
-      suggestionOne: "Compact mode for denser tables and cards",
-      suggestionTwo: "Optional motion reduction for calmer transitions",
-      suggestionThree: "Custom date and time format per admin",
       sectionOneTitle: "Current experience",
       sectionOneBody: "Theme and language are saved per admin account so each person can use the panel in their preferred style",
       sectionTwoTitle: "Available languages",
@@ -141,10 +137,6 @@ const LANGUAGE_COPY = {
       save: "Salvar configurações",
       saving: "Salvando",
       saved: "Configurações atualizadas",
-      suggestionsTitle: "Ideias para depois",
-      suggestionOne: "Modo compacto para tabelas e cards mais densos",
-      suggestionTwo: "Redução opcional de animações para transições mais calmas",
-      suggestionThree: "Formato de data e hora personalizado por admin",
       sectionOneTitle: "Experiência atual",
       sectionOneBody: "Tema e idioma ficam salvos por conta admin para cada pessoa usar o painel do jeito que preferir",
       sectionTwoTitle: "Idiomas disponíveis",
@@ -210,10 +202,6 @@ const LANGUAGE_COPY = {
       save: "Guardar configuración",
       saving: "Guardando",
       saved: "Configuración actualizada",
-      suggestionsTitle: "Ideas para después",
-      suggestionOne: "Modo compacto para tablas y tarjetas más densas",
-      suggestionTwo: "Reducción opcional de movimiento para transiciones más suaves",
-      suggestionThree: "Formato de fecha y hora personalizado por admin",
       sectionOneTitle: "Experiencia actual",
       sectionOneBody: "El tema y el idioma se guardan por cuenta admin para que cada persona use el panel como prefiera",
       sectionTwoTitle: "Idiomas disponibles",
@@ -605,15 +593,6 @@ function SettingsPanel({
 
         <article className="settings-card settings-card--wide">
           <div className="settings-submit">
-            <div className="settings-suggestions">
-              <strong>{copy.settings.suggestionsTitle}</strong>
-              <ul>
-                <li>{copy.settings.suggestionOne}</li>
-                <li>{copy.settings.suggestionTwo}</li>
-                <li>{copy.settings.suggestionThree}</li>
-              </ul>
-            </div>
-
             <div className="settings-submit__actions">
               {preferencesState.error ? (
                 <p className="error-copy">{preferencesState.error}</p>

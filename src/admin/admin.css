@@ -405,25 +405,6 @@ body {
   align-items: flex-start;
 }
 
-.settings-suggestions {
-  color: var(--admin-muted);
-}
-
-.settings-suggestions strong {
-  display: block;
-  margin-bottom: 10px;
-  color: var(--admin-text);
-}
-
-.settings-suggestions ul {
-  margin: 0;
-  padding-left: 18px;
-}
-
-.settings-suggestions li + li {
-  margin-top: 8px;
-}
-
 .settings-submit__actions {
   display: grid;
   gap: 10px;
@@ -1849,4 +1830,76 @@ body {
     width: 100%;
     justify-items: stretch;
   }
+}
+
+/* Theme consistency overrides */
+.admin-shell {
+  background:
+    radial-gradient(circle at top right, var(--admin-bg-glow-secondary), transparent 24%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.02), rgba(9, 15, 29, 0.48)),
+    var(--admin-panel);
+}
+
+.admin-card,
+.profile-panel,
+.settings-card,
+.control-card,
+.user-card,
+.audit-card,
+.lookup-result,
+.result-code,
+.member-card,
+.role-permissions-card,
+.permission-tile,
+.role-permission-card,
+.dataset-card {
+  border-color: var(--admin-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)),
+    rgba(8, 14, 25, 0.58);
+}
+
+.sidebar-nav__button.is-active,
+.settings-option.is-selected,
+.permission-tile.is-enabled,
+.control-card.is-enabled {
+  border-color: var(--admin-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    rgba(255, 255, 255, 0.04);
+}
+
+.sidebar-nav__icon,
+.sidebar-brand__mark,
+.sidebar-avatar {
+  border-color: var(--admin-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+    rgba(255, 255, 255, 0.03);
+}
+
+.eyebrow,
+.status-pill,
+.sidebar-profile__meta span,
+.lookup-meta span,
+.dataset-badge {
+  border-color: var(--admin-line);
+  color: var(--admin-text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.status-copy {
+  border-color: var(--admin-line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.status-copy--success {
+  color: var(--admin-text);
+  border-color: var(--admin-line);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.submit-button,
+.logout-button {
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--admin-accent-strong) 34%, transparent);
 }
